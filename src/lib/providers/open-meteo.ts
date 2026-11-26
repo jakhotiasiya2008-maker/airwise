@@ -1,4 +1,4 @@
-import { AirQualityProvider, AirQualityReading } from "@/types/air-quality";
+import { AirQualityProvider, AirQualityReading, HourlyForecastPoint } from "@/types/air-quality";
 import { calculateCpcbAqi } from "@/lib/cpcb/calculator";
 
 export class OpenMeteoAirQualityProvider implements AirQualityProvider {
@@ -12,10 +12,9 @@ export class OpenMeteoAirQualityProvider implements AirQualityProvider {
     const url = new URL("https://air-quality-api.open-meteo.com/v1/air-quality");
     url.searchParams.set("latitude", lat.toFixed(4));
     url.searchParams.set("longitude", lon.toFixed(4));
-    url.searchParams.set(
-      "current",
-      "pm10,pm2_5,us_aqi,european_aqi"
-    );
+    url.searchParams.set("current", "pm10,pm2_5,us_aqi,european_aqi");
+    url.searchParams.set("hourly", "pm10,pm2_5,us_aqi");
+    url.searchParams.set("forecast_days", "2");
     url.searchParams.set("timezone", "Asia/Kolkata");
 
     const controller = new AbortController();
@@ -26,9 +25,9 @@ export class OpenMeteoAirQualityProvider implements AirQualityProvider {
         signal: controller.signal,
         headers: {
           Accept: "application/json",
-          "User-Agent": "AirWiseIndia/1.0",
+          "User-Agent": "AirWiseIndia/2.0",
         },
-        next: { revalidate: 600 }, // 10 minutes cache hint
+        next: { revalidate: 600 },
       });
 
       if (!response.ok) {
@@ -49,7 +48,73 @@ export class OpenMeteoAirQualityProvider implements AirQualityProvider {
 
       const { aqi, category } = calculateCpcbAqi(pm25, pm10);
 
-      // Format current timestamp in IST
+      // Process 24-hour forecast
+      let hourlyForecast: HourlyForecastPoint[] = [];
+      let bestWindow: { start: string; end: string; reason: string } | undefined;
+      let avoidWindow: { start: string; end: string; reason: string } | undefined;
+
+      if (data.hourly && Array.isArray(data.hourly.time)) {
+        const times: string[] = data.hourly.time;
+        const pm25Arr: number[] = data.hourly.pm2_5 || [];
+        const pm10Arr: number[] = data.hourly.pm10 || [];
+
+        // Find current time index or start from now
+        const nowIsoPrefix = new Date().toISOString().slice(0, 13); // YYYY-MM-DDTHH
+        let startIndex = times.findIndex((t) => t.startsWith(nowIsoPrefix));
+        if (startIndex === -1) startIndex = 0;
+
+        const next24Times = times.slice(startIndex, startIndex + 24);
+        hourlyForecast = next24Times.map((t, i) => {
+          const idx = startIndex + i;
+          const hPm25 = Math.round((pm25Arr[idx] || pm25) * 10) / 10;
+          const hPm10 = Math.round((pm10Arr[idx] || pm10) * 10) / 10;
+          const calc = calculateCpcbAqi(hPm25, hPm10);
+
+          const dateObj = new Date(t);
+          const hourLabel = dateObj.toLocaleTimeString("en-IN", {
+            hour: "numeric",
+            hour12: true,
+            timeZone: "Asia/Kolkata",
+          });
+
+          let rec: "optimal" | "acceptable" | "avoid" = "acceptable";
+          if (calc.category === "Good" || calc.category === "Satisfactory") {
+            rec = "optimal";
+          } else if (calc.category === "Very Poor" || calc.category === "Severe") {
+            rec = "avoid";
+          }
+
+          return {
+            time: t,
+            hourLabel,
+            pm25: hPm25,
+            pm10: hPm10,
+            aqi: calc.aqi,
+            category: calc.category,
+            recommendation: rec,
+          };
+        });
+
+        // Compute best and worst windows
+        if (hourlyForecast.length > 0) {
+          const sortedByAqi = [...hourlyForecast].sort((a, b) => a.aqi - b.aqi);
+          const best = sortedByAqi[0];
+          const worst = sortedByAqi[sortedByAqi.length - 1];
+
+          bestWindow = {
+            start: best.hourLabel,
+            end: `${best.hourLabel} - 3 hrs later`,
+            reason: `Lowest predicted diurnal AQI (~${best.aqi}) due to maximum solar vertical dispersion.`,
+          };
+
+          avoidWindow = {
+            start: worst.hourLabel,
+            end: "Early morning / Night",
+            reason: `Peak nocturnal thermal inversion trap (~${worst.aqi} AQI).`,
+          };
+        }
+      }
+
       const now = new Date();
       const istFormatter = new Intl.DateTimeFormat("en-IN", {
         timeZone: "Asia/Kolkata",
@@ -71,6 +136,9 @@ export class OpenMeteoAirQualityProvider implements AirQualityProvider {
         timestampUtc: now.toISOString(),
         timestampIst: `${istFormatter.format(now)} IST`,
         isModelled: true,
+        hourlyForecast,
+        bestWindow,
+        avoidWindow,
       };
     } finally {
       clearTimeout(timeout);

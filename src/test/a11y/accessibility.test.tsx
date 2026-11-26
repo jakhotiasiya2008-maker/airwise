@@ -5,6 +5,8 @@ import axe from "axe-core";
 import { AirQualityHero } from "@/components/AirQualityHero";
 import { Header } from "@/components/Header";
 import { HealthAdvisoryBanner } from "@/components/HealthAdvisoryBanner";
+import { AirQualityRadialGauge } from "@/components/AirQualityRadialGauge";
+import { LanguageProvider } from "@/lib/i18n/context";
 import { AirQualityReading } from "@/types/air-quality";
 import { HealthAdvisory } from "@/types/guidance";
 
@@ -34,25 +36,43 @@ describe("Accessibility (WCAG 2.2 AA) Compliance Tests", () => {
 
   it("Header satisfies axe accessibility rules", async () => {
     const { container } = render(
-      <Header
-        onOpenProfile={() => {}}
-        engine="rule-based"
-        activePersonaName="Vulnerable Family"
-      />
+      <LanguageProvider>
+        <Header
+          onOpenProfile={() => {}}
+          onOpenCommandPalette={() => {}}
+          engine="rule-based"
+          activePersonaName="Vulnerable Family"
+          isDark={false}
+          onToggleTheme={() => {}}
+        />
+      </LanguageProvider>
     );
 
     const results = await axe.run(container);
-    // Ignore landmarks rule for partial component snippet if needed, but here it has banner
     const violations = results.violations.filter((v) => v.id !== "region");
     expect(violations).toHaveLength(0);
   });
 
-  it("AirQualityHero satisfies axe accessibility rules and color contrast", async () => {
+  it("AirQualityRadialGauge meter role satisfies axe rules", async () => {
     const { container } = render(
-      <AirQualityHero
-        reading={mockReading}
-        selectedCityName="Delhi (NCR)"
-      />
+      <AirQualityRadialGauge aqi={312} category="Very Poor" />
+    );
+
+    const results = await axe.run(container);
+    const violations = results.violations.filter((v) => v.id !== "region");
+    expect(violations).toHaveLength(0);
+  });
+
+  it("AirQualityHero satisfies axe accessibility rules in dark mode", async () => {
+    const { container } = render(
+      <LanguageProvider>
+        <div className="dark">
+          <AirQualityHero
+            reading={mockReading}
+            selectedCityName="Delhi (NCR)"
+          />
+        </div>
+      </LanguageProvider>
     );
 
     const results = await axe.run(container);

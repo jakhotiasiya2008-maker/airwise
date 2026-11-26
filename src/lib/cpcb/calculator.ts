@@ -35,10 +35,8 @@ function calculateSubIndex(concentration: number, breakpoints: Breakpoint[]): nu
     }
   }
 
-  // If concentration exceeds the highest range
   const last = breakpoints[breakpoints.length - 1];
   if (concentration > last.cHigh) {
-    // Extrapolate up to 500 or slightly above
     const factor = (last.iHigh - last.iLow) / (last.cHigh - last.cLow);
     const extrapolated = last.iHigh + factor * (concentration - last.cHigh);
     return Math.min(500, Math.round(extrapolated));
@@ -89,6 +87,7 @@ export function getCpcbCategoryInfo(category: CpcbCategory): CpcbCategoryInfo {
         textColor: "text-emerald-900 dark:text-emerald-100",
         shortDescription: "Minimal health impact",
         healthImplication: "Air quality is considered satisfactory, and air pollution poses little or no risk.",
+        emoji: "🟢",
       };
     case "Satisfactory":
       return {
@@ -102,6 +101,7 @@ export function getCpcbCategoryInfo(category: CpcbCategory): CpcbCategoryInfo {
         textColor: "text-lime-900 dark:text-lime-100",
         shortDescription: "Minor breathing discomfort to sensitive people",
         healthImplication: "Acceptable air quality; sensitive individuals may experience minor breathing discomfort.",
+        emoji: "🟡",
       };
     case "Moderate":
       return {
@@ -113,8 +113,9 @@ export function getCpcbCategoryInfo(category: CpcbCategory): CpcbCategoryInfo {
         borderClass: "border-amber-300 dark:border-amber-700",
         hexColor: "#b45309",
         textColor: "text-amber-950 dark:text-amber-100",
-        shortDescription: "Breathing discomfort to lungs, asthma & heart patients",
+        shortDescription: "Discomfort for asthma & heart patients",
         healthImplication: "May cause breathing discomfort to people with asthma, lung or heart conditions.",
+        emoji: "🟠",
       };
     case "Poor":
       return {
@@ -126,8 +127,9 @@ export function getCpcbCategoryInfo(category: CpcbCategory): CpcbCategoryInfo {
         borderClass: "border-orange-300 dark:border-orange-700",
         hexColor: "#c2410c",
         textColor: "text-orange-950 dark:text-orange-100",
-        shortDescription: "Breathing discomfort on prolonged exposure",
+        shortDescription: "Discomfort on prolonged exposure",
         healthImplication: "Breathing discomfort to most people on prolonged exposure; significant discomfort for sensitive groups.",
+        emoji: "🟤",
       };
     case "Very Poor":
       return {
@@ -141,6 +143,7 @@ export function getCpcbCategoryInfo(category: CpcbCategory): CpcbCategoryInfo {
         textColor: "text-rose-950 dark:text-rose-100",
         shortDescription: "Respiratory illness on prolonged exposure",
         healthImplication: "Can cause respiratory illness on prolonged exposure; severely affects individuals with lung or heart diseases.",
+        emoji: "🔴",
       };
     case "Severe":
     default:
@@ -155,6 +158,7 @@ export function getCpcbCategoryInfo(category: CpcbCategory): CpcbCategoryInfo {
         textColor: "text-purple-950 dark:text-purple-100",
         shortDescription: "Severe health hazard affecting healthy people",
         healthImplication: "Affects healthy people and seriously impacts those with existing medical conditions. Avoid outdoor exposure.",
+        emoji: "🟣",
       };
   }
 }

@@ -17,6 +17,17 @@ export interface CpcbCategoryInfo {
   textColor: string;
   shortDescription: string;
   healthImplication: string;
+  emoji: string;
+}
+
+export interface HourlyForecastPoint {
+  time: string;
+  hourLabel: string;
+  pm25: number;
+  pm10: number;
+  aqi: number;
+  category: CpcbCategory;
+  recommendation: "optimal" | "acceptable" | "avoid";
 }
 
 export interface AirQualityReading {
@@ -33,6 +44,9 @@ export interface AirQualityReading {
   timestampUtc: string;
   timestampIst: string;
   isModelled: boolean;
+  hourlyForecast?: HourlyForecastPoint[];
+  bestWindow?: { start: string; end: string; reason: string };
+  avoidWindow?: { start: string; end: string; reason: string };
 }
 
 export interface AirQualityProvider {

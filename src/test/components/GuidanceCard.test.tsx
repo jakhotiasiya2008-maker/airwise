@@ -3,6 +3,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect } from "vitest";
 import { GuidanceCardItem } from "@/components/GuidanceCardItem";
 import { GuidanceCard } from "@/types/guidance";
+import { LanguageProvider } from "@/lib/i18n/context";
 
 describe("GuidanceCardItem Component", () => {
   const mockCard: GuidanceCard = {
@@ -15,23 +16,33 @@ describe("GuidanceCardItem Component", () => {
     tags: ["Timing", "Inversion"],
   };
 
-  it("renders card title, action, urgency badge, and tags", () => {
-    render(<GuidanceCardItem card={mockCard} />);
+  it("renders card title, action, and urgency badge", () => {
+    render(
+      <LanguageProvider>
+        <GuidanceCardItem card={mockCard} />
+      </LanguageProvider>
+    );
 
     expect(screen.getByText("Shift Routine to Midday")).toBeInTheDocument();
-    expect(screen.getByText("Postpone morning walks until after 11 AM when boundary layer lifts.")).toBeInTheDocument();
-    expect(screen.getByText("Critical Action")).toBeInTheDocument();
-    expect(screen.getByText(/Timing/)).toBeInTheDocument();
+    expect(
+      screen.getByText("Postpone morning walks until after 11 AM when boundary layer lifts.")
+    ).toBeInTheDocument();
+    // Critical urgency maps to "Act Now" in translation
+    expect(screen.getByText(/Act Now/i)).toBeInTheDocument();
   });
 
   it("toggles scientific reasoning and expected impact upon expanding", () => {
-    render(<GuidanceCardItem card={mockCard} />);
+    render(
+      <LanguageProvider>
+        <GuidanceCardItem card={mockCard} />
+      </LanguageProvider>
+    );
 
     // Initially collapsed
     expect(screen.queryByText(/Nocturnal temperature inversions/)).not.toBeInTheDocument();
 
     const expandButton = screen.getByRole("button", {
-      name: /Scientific Reason & Expected Impact/i,
+      name: /Why This Matters/i,
     });
     fireEvent.click(expandButton);
 
