@@ -81,42 +81,44 @@ export function buildUserPrompt(data: UserPromptData): string {
   return JSON.stringify(payload, null, 2);
 }
 
-// JSON Schema definition for Gemini response format
-export const GEMINI_RESPONSE_SCHEMA = {
-  type: "object",
+import { Type, Schema } from "@google/genai";
+
+// Schema definition for Gemini response format using @google/genai Schema
+export const GEMINI_RESPONSE_SCHEMA: Schema = {
+  type: Type.OBJECT,
   properties: {
     healthAdvisory: {
-      type: "object",
+      type: Type.OBJECT,
       properties: {
-        severity: { type: "string", enum: ["mild", "moderate", "high", "severe"] },
-        headline: { type: "string" },
-        summary: { type: "string" },
-        sensitiveGroupWarning: { type: "string" },
-        disclaimer: { type: "string" },
+        severity: { type: Type.STRING, enum: ["mild", "moderate", "high", "severe"] },
+        headline: { type: Type.STRING },
+        summary: { type: Type.STRING },
+        sensitiveGroupWarning: { type: Type.STRING },
+        disclaimer: { type: Type.STRING },
       },
       required: ["severity", "headline", "summary", "disclaimer"],
     },
     sections: {
-      type: "object",
+      type: Type.OBJECT,
       properties: {
         dailyRoutines: {
-          type: "object",
+          type: Type.OBJECT,
           properties: {
-            id: { type: "string", enum: ["daily_routines"] },
-            title: { type: "string" },
-            subtitle: { type: "string" },
+            id: { type: Type.STRING, enum: ["daily_routines"] },
+            title: { type: Type.STRING },
+            subtitle: { type: Type.STRING },
             cards: {
-              type: "array",
+              type: Type.ARRAY,
               items: {
-                type: "object",
+                type: Type.OBJECT,
                 properties: {
-                  id: { type: "string" },
-                  title: { type: "string" },
-                  action: { type: "string" },
-                  whyThisMatters: { type: "string" },
-                  expectedImpact: { type: "string" },
-                  urgency: { type: "string", enum: ["low", "medium", "high", "critical"] },
-                  tags: { type: "array", items: { type: "string" } },
+                  id: { type: Type.STRING },
+                  title: { type: Type.STRING },
+                  action: { type: Type.STRING },
+                  whyThisMatters: { type: Type.STRING },
+                  expectedImpact: { type: Type.STRING },
+                  urgency: { type: Type.STRING, enum: ["low", "medium", "high", "critical"] },
+                  tags: { type: Type.ARRAY, items: { type: Type.STRING } },
                 },
                 required: ["id", "title", "action", "whyThisMatters", "expectedImpact", "urgency"],
               },
@@ -125,23 +127,23 @@ export const GEMINI_RESPONSE_SCHEMA = {
           required: ["id", "title", "subtitle", "cards"],
         },
         indoorAir: {
-          type: "object",
+          type: Type.OBJECT,
           properties: {
-            id: { type: "string", enum: ["indoor_air"] },
-            title: { type: "string" },
-            subtitle: { type: "string" },
+            id: { type: Type.STRING, enum: ["indoor_air"] },
+            title: { type: Type.STRING },
+            subtitle: { type: Type.STRING },
             cards: {
-              type: "array",
+              type: Type.ARRAY,
               items: {
-                type: "object",
+                type: Type.OBJECT,
                 properties: {
-                  id: { type: "string" },
-                  title: { type: "string" },
-                  action: { type: "string" },
-                  whyThisMatters: { type: "string" },
-                  expectedImpact: { type: "string" },
-                  urgency: { type: "string", enum: ["low", "medium", "high", "critical"] },
-                  tags: { type: "array", items: { type: "string" } },
+                  id: { type: Type.STRING },
+                  title: { type: Type.STRING },
+                  action: { type: Type.STRING },
+                  whyThisMatters: { type: Type.STRING },
+                  expectedImpact: { type: Type.STRING },
+                  urgency: { type: Type.STRING, enum: ["low", "medium", "high", "critical"] },
+                  tags: { type: Type.ARRAY, items: { type: Type.STRING } },
                 },
                 required: ["id", "title", "action", "whyThisMatters", "expectedImpact", "urgency"],
               },
@@ -150,23 +152,23 @@ export const GEMINI_RESPONSE_SCHEMA = {
           required: ["id", "title", "subtitle", "cards"],
         },
         sustainableAlternatives: {
-          type: "object",
+          type: Type.OBJECT,
           properties: {
-            id: { type: "string", enum: ["sustainable_alternatives"] },
-            title: { type: "string" },
-            subtitle: { type: "string" },
+            id: { type: Type.STRING, enum: ["sustainable_alternatives"] },
+            title: { type: Type.STRING },
+            subtitle: { type: Type.STRING },
             cards: {
-              type: "array",
+              type: Type.ARRAY,
               items: {
-                type: "object",
+                type: Type.OBJECT,
                 properties: {
-                  id: { type: "string" },
-                  title: { type: "string" },
-                  action: { type: "string" },
-                  whyThisMatters: { type: "string" },
-                  expectedImpact: { type: "string" },
-                  urgency: { type: "string", enum: ["low", "medium", "high", "critical"] },
-                  tags: { type: "array", items: { type: "string" } },
+                  id: { type: Type.STRING },
+                  title: { type: Type.STRING },
+                  action: { type: Type.STRING },
+                  whyThisMatters: { type: Type.STRING },
+                  expectedImpact: { type: Type.STRING },
+                  urgency: { type: Type.STRING, enum: ["low", "medium", "high", "critical"] },
+                  tags: { type: Type.ARRAY, items: { type: Type.STRING } },
                 },
                 required: ["id", "title", "action", "whyThisMatters", "expectedImpact", "urgency"],
               },
