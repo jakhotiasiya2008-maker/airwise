@@ -1,6 +1,10 @@
+"use client";
+
 import React, { useState } from "react";
 import { HouseholdProfile, CommuteMode } from "@/types/profile";
 import { X, Check } from "lucide-react";
+import { DemographicCheckboxes } from "./profile/DemographicCheckboxes";
+import { ApplianceCheckboxes } from "./profile/ApplianceCheckboxes";
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -9,6 +13,10 @@ interface ProfileModalProps {
   onSaveProfile: (profile: HouseholdProfile) => void;
 }
 
+/**
+ * Modal dialog for configuring household vulnerability attributes,
+ * commute modes, air purifier ownership, and medical notes.
+ */
 export const ProfileModal: React.FC<ProfileModalProps> = ({
   isOpen,
   onClose,
@@ -19,7 +27,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
     onSaveProfile(formData);
     onClose();
@@ -54,64 +62,14 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Household Demographic Checkboxes */}
-          <div>
-            <span className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
-              Household Members
-            </span>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <label className="flex items-center gap-2.5 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.hasYoungChildren}
-                  onChange={(e) => setFormData({ ...formData, hasYoungChildren: e.target.checked })}
-                  className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-xs font-medium text-slate-800 dark:text-slate-200">
-                  Young Children / Infants
-                </span>
-              </label>
-
-              <label className="flex items-center gap-2.5 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.hasSeniors}
-                  onChange={(e) => setFormData({ ...formData, hasSeniors: e.target.checked })}
-                  className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-xs font-medium text-slate-800 dark:text-slate-200">
-                  Senior Citizens (60+)
-                </span>
-              </label>
-
-              <label className="flex items-center gap-2.5 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.hasRespiratorySensitivity}
-                  onChange={(e) => setFormData({ ...formData, hasRespiratorySensitivity: e.target.checked })}
-                  className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-xs font-medium text-rose-700 dark:text-rose-400 font-semibold">
-                  Asthma / Lung Sensitivity
-                </span>
-              </label>
-
-              <label className="flex items-center gap-2.5 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.hasStudents}
-                  onChange={(e) => setFormData({ ...formData, hasStudents: e.target.checked })}
-                  className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-xs font-medium text-slate-800 dark:text-slate-200">
-                  School / College Students
-                </span>
-              </label>
-            </div>
-          </div>
+          <DemographicCheckboxes profile={formData} onChange={setFormData} />
 
           {/* Commute Mode Selector */}
           <div>
-            <label htmlFor="commute-mode-select" className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+            <label
+              htmlFor="commute-mode-select"
+              className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5"
+            >
               Primary Daily Commute Mode
             </label>
             <select
@@ -131,40 +89,14 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
           </div>
 
           {/* Equipment & Indoor Setup */}
-          <div>
-            <span className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
-              Indoor Appliances & Plants
-            </span>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <label className="flex items-center gap-2.5 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.hasAirPurifier}
-                  onChange={(e) => setFormData({ ...formData, hasAirPurifier: e.target.checked })}
-                  className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-xs font-medium text-slate-800 dark:text-slate-200">
-                  Owns HEPA Air Purifier
-                </span>
-              </label>
-
-              <label className="flex items-center gap-2.5 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.hasIndoorPlants}
-                  onChange={(e) => setFormData({ ...formData, hasIndoorPlants: e.target.checked })}
-                  className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-xs font-medium text-slate-800 dark:text-slate-200">
-                  Has Indoor Houseplants
-                </span>
-              </label>
-            </div>
-          </div>
+          <ApplianceCheckboxes profile={formData} onChange={setFormData} />
 
           {/* Custom Notes (Sanitized) */}
           <div>
-            <label htmlFor="custom-notes" className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+            <label
+              htmlFor="custom-notes"
+              className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5"
+            >
               Specific Sensitivities or Context (Max 300 chars)
             </label>
             <textarea

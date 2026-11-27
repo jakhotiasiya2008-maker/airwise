@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { AirQualityReading, CityLocation } from "@/types/air-quality";
 import { getCpcbCategoryInfo } from "@/lib/cpcb/calculator";
 import { ArrowLeftRight, Loader2, RefreshCw } from "lucide-react";
@@ -13,7 +13,7 @@ export const CompareCitiesView: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
-  const fetchCompareData = async () => {
+  const fetchCompareData = useCallback(async () => {
     setIsLoading(true);
     try {
       const res = await fetch("/api/compare?cities=delhi,mumbai,bengaluru,kolkata");
@@ -26,13 +26,13 @@ export const CompareCitiesView: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     if (isOpen && comparisons.length === 0) {
       fetchCompareData();
     }
-  }, [isOpen]);
+  }, [isOpen, comparisons.length, fetchCompareData]);
 
   return (
     <section

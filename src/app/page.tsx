@@ -1,14 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
-import { CityLocation, AirQualityReading } from "@/types/air-quality";
-import { HouseholdProfile, PersonaPreset } from "@/types/profile";
-import { GuidanceResponse } from "@/types/guidance";
-import { DEFAULT_CITIES } from "@/lib/constants/cities";
+import React from "react";
 import { PERSONA_PRESETS } from "@/lib/constants/personas";
 import { useLanguage } from "@/lib/i18n/context";
+import { useHouseholdContext } from "@/hooks/useHouseholdContext";
+import { useAirQualityData } from "@/hooks/useAirQualityData";
 
-// Components
+// Visual Components
 import { Header } from "@/components/Header";
 import { LocationSearch } from "@/components/LocationSearch";
 import { AirQualityHero } from "@/components/AirQualityHero";
@@ -26,212 +24,45 @@ import { BottomNavBar } from "@/components/BottomNavBar";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 import { ErrorDisplay } from "@/components/ErrorDisplay";
 
-const PROFILE_STORAGE_KEY = "airwise_india_profile";
-const PERSONA_STORAGE_KEY = "airwise_india_persona_id";
-const ONBOARDING_KEY = "airwise_onboarding_completed_v2";
-const THEME_STORAGE_KEY = "airwise_theme_dark";
-const LAST_AQ_STORAGE_KEY = "airwise_last_aq_reading";
-
+/**
+ * Primary AirWise India Dashboard page.
+ * Orchestrates live AQI readings, customized AI/rule guidance,
+ * persona selection, and interactive scenario tools.
+ */
 export default function HomePage() {
   const { language } = useLanguage();
 
-  // Primary state
-  const [currentCity, setCurrentCity] = useState<CityLocation>(DEFAULT_CITIES[0]);
-  const [activePersonaId, setActivePersonaId] = useState<string>("vulnerable_family");
-  const [profile, setProfile] = useState<HouseholdProfile>(PERSONA_PRESETS[0].profile);
+  const {
+    currentCity,
+    setCurrentCity,
+    activePersonaId,
+    profile,
+    isDark,
+    isOffline,
+    isProfileModalOpen,
+    setIsProfileModalOpen,
+    isShareModalOpen,
+    setIsShareModalOpen,
+    isCommandPaletteOpen,
+    setIsCommandPaletteOpen,
+    isOnboardingOpen,
+    toggleTheme,
+    selectPreset,
+    saveCustomProfile,
+    completeOnboarding,
+    skipOnboarding,
+  } = useHouseholdContext();
 
-  // Dialog & Modal states
-  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
-  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
+  const {
+    airQuality,
+    guidance,
+    isLoading,
+    isRefreshing,
+    error,
+    loadData,
+  } = useAirQualityData(currentCity, profile, language);
 
-  // Theme state (Dark/Light mode)
-  const [isDark, setIsDark] = useState(false);
-
-  // Network offline state
-  const [isOffline, setIsOffline] = useState(false);
-
-  // Data states
-  const [airQuality, setAirQuality] = useState<AirQualityReading | null>(null);
-  const [guidance, setGuidance] = useState<GuidanceResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  // Load theme and onboarding on client mount
-  useEffect(() => {
-    try {
-      // Check online status
-      setIsOffline(!navigator.onLine);
-      const handleOnline = () => setIsOffline(false);
-      const handleOffline = () => setIsOffline(true);
-      window.addEventListener("online", handleOnline);
-      window.addEventListener("offline", handleOffline);
-
-      // Check dark mode
-      const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
-      if (savedTheme !== null) {
-        setIsDark(savedTheme === "true");
-      } else {
-        setIsDark(window.matchMedia("(prefers-color-scheme: dark)").matches);
-      }
-
-      // Check onboarding
-      const onboardingCompleted = localStorage.getItem(ONBOARDING_KEY);
-      if (!onboardingCompleted) {
-        setIsOnboardingOpen(true);
-      }
-
-      // Load profile & persona
-      const savedPersona = localStorage.getItem(PERSONA_STORAGE_KEY);
-      if (savedPersona) setActivePersonaId(savedPersona);
-
-      const savedProfile = localStorage.getItem(PROFILE_STORAGE_KEY);
-      if (savedProfile) setProfile(JSON.parse(savedProfile));
-
-      // Offline shell cache check
-      const lastCachedReading = localStorage.getItem(LAST_AQ_STORAGE_KEY);
-      if (lastCachedReading && !navigator.onLine) {
-        setAirQuality(JSON.parse(lastCachedReading));
-      }
-
-      return () => {
-        window.removeEventListener("online", handleOnline);
-        window.removeEventListener("offline", handleOffline);
-      };
-    } catch (e) {
-      console.warn("Storage initialization notice:", e);
-    }
-  }, []);
-
-  // Sync dark class to html document element
-  useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [isDark]);
-
-  const toggleTheme = () => {
-    setIsDark((prev) => {
-      const next = !prev;
-      try {
-        localStorage.setItem(THEME_STORAGE_KEY, String(next));
-      } catch (e) {
-        console.warn("Could not save theme:", e);
-      }
-      return next;
-    });
-  };
-
-  // Fetch live air quality and guidance
-  const loadData = useCallback(
-    async (city: CityLocation, currentProfile: HouseholdProfile, isManualRefresh = false) => {
-      if (isManualRefresh) setIsRefreshing(true);
-      else setIsLoading(true);
-      setError(null);
-
-      try {
-        // 1. Fetch live air quality (Real API: Open-Meteo)
-        const aqUrl = `/api/air-quality?lat=${city.latitude}&lon=${city.longitude}&city=${encodeURIComponent(
-          city.name
-        )}`;
-        const aqRes = await fetch(aqUrl);
-
-        if (!aqRes.ok) {
-          throw new Error("Unable to fetch live air quality reading. Please try again.");
-        }
-
-        const aqData: AirQualityReading = await aqRes.json();
-        setAirQuality(aqData);
-
-        // Cache for offline usage
-        try {
-          localStorage.setItem(LAST_AQ_STORAGE_KEY, JSON.stringify(aqData));
-        } catch {}
-
-        // 2. Fetch AI / Rule-Based Guidance
-        const guidanceRes = await fetch("/api/guidance", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            city: city.name,
-            latitude: city.latitude,
-            longitude: city.longitude,
-            aqi: aqData.aqi,
-            pm25: aqData.pm25,
-            pm10: aqData.pm10,
-            category: aqData.cpcbCategory,
-            source: aqData.source,
-            timestampIst: aqData.timestampIst,
-            profile: currentProfile,
-          }),
-        });
-
-        if (!guidanceRes.ok) {
-          throw new Error("Failed to generate personalized guidance. Please try again.");
-        }
-
-        const guidanceData: GuidanceResponse = await guidanceRes.json();
-        setGuidance(guidanceData);
-      } catch (err: unknown) {
-        console.error("Data loading error:", err);
-        setError(err instanceof Error ? err.message : "An unexpected network error occurred.");
-      } finally {
-        setIsLoading(false);
-        setIsRefreshing(false);
-      }
-    },
-    []
-  );
-
-  // Trigger on city, profile, or language change
-  useEffect(() => {
-    loadData(currentCity, profile);
-  }, [currentCity, profile, language, loadData]);
-
-  // Handle Preset selection
-  const handleSelectPreset = (preset: PersonaPreset) => {
-    setActivePersonaId(preset.id);
-    setProfile(preset.profile);
-    try {
-      localStorage.setItem(PERSONA_STORAGE_KEY, preset.id);
-      localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(preset.profile));
-    } catch {}
-  };
-
-  // Handle saving custom profile
-  const handleSaveCustomProfile = (newProfile: HouseholdProfile) => {
-    setProfile(newProfile);
-    setActivePersonaId("custom");
-    try {
-      localStorage.setItem(PERSONA_STORAGE_KEY, "custom");
-      localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(newProfile));
-    } catch {}
-  };
-
-  // Handle onboarding completion
-  const handleOnboardingComplete = (city: CityLocation, completedProfile: HouseholdProfile) => {
-    setCurrentCity(city);
-    setProfile(completedProfile);
-    setIsOnboardingOpen(false);
-    try {
-      localStorage.setItem(ONBOARDING_KEY, "true");
-      localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(completedProfile));
-    } catch {}
-  };
-
-  const handleOnboardingSkip = () => {
-    setIsOnboardingOpen(false);
-    try {
-      localStorage.setItem(ONBOARDING_KEY, "true");
-    } catch {}
-  };
-
-  // Background tint calculation based on CPCB category (subtle gradient, maintaining 4.5:1 contrast)
-  const getCategoryBgClass = () => {
+  const getCategoryBgClass = (): string => {
     if (!airQuality) return "bg-slate-50 dark:bg-slate-950";
     switch (airQuality.cpcbCategory) {
       case "Severe":
@@ -252,7 +83,9 @@ export default function HomePage() {
   const activePreset = PERSONA_PRESETS.find((p) => p.id === activePersonaId);
 
   return (
-    <div className={`min-h-screen flex flex-col ${getCategoryBgClass()} text-slate-900 dark:text-slate-100 transition-colors pb-16 sm:pb-0`}>
+    <div
+      className={`min-h-screen flex flex-col ${getCategoryBgClass()} text-slate-900 dark:text-slate-100 transition-colors pb-16 sm:pb-0`}
+    >
       {/* Top Header */}
       <Header
         onOpenProfile={() => setIsProfileModalOpen(true)}
@@ -265,11 +98,15 @@ export default function HomePage() {
       />
 
       {/* Main Content Area */}
-      <main id="main-content" tabIndex={-1} className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6"
+      >
         {/* City and Location Search */}
         <LocationSearch
           currentCity={currentCity}
-          onSelectCity={(city) => setCurrentCity(city)}
+          onSelectCity={setCurrentCity}
           isLoading={isLoading}
         />
 
@@ -277,7 +114,7 @@ export default function HomePage() {
         <PersonaSelector
           currentProfile={profile}
           activePersonaId={activePersonaId}
-          onSelectPreset={handleSelectPreset}
+          onSelectPreset={selectPreset}
           onOpenCustomModal={() => setIsProfileModalOpen(true)}
         />
 
@@ -345,16 +182,16 @@ export default function HomePage() {
       {/* Onboarding Wizard Modal */}
       <OnboardingWizard
         isOpen={isOnboardingOpen}
-        onComplete={handleOnboardingComplete}
-        onSkip={handleOnboardingSkip}
+        onComplete={completeOnboarding}
+        onSkip={skipOnboarding}
       />
 
       {/* Command Palette (Ctrl+K) */}
       <CommandPalette
         isOpen={isCommandPaletteOpen}
         onClose={() => setIsCommandPaletteOpen(false)}
-        onSelectCity={(city) => setCurrentCity(city)}
-        onSelectPreset={handleSelectPreset}
+        onSelectCity={setCurrentCity}
+        onSelectPreset={selectPreset}
         onToggleTheme={toggleTheme}
         isDark={isDark}
       />
@@ -375,15 +212,16 @@ export default function HomePage() {
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}
         profile={profile}
-        onSaveProfile={handleSaveCustomProfile}
+        onSaveProfile={saveCustomProfile}
       />
 
       {/* Mobile Bottom Navigation Bar */}
       <BottomNavBar
         onOpenProfile={() => setIsProfileModalOpen(true)}
         onOpenTools={() => {
-          // Trigger tools section scroll or focus
-          const toolsTabBtn = document.querySelector('[aria-selected="false"][role="tab"]:last-child') as HTMLButtonElement;
+          const toolsTabBtn = document.querySelector(
+            '[aria-selected="false"][role="tab"]:last-child'
+          ) as HTMLButtonElement | null;
           if (toolsTabBtn) toolsTabBtn.click();
         }}
       />

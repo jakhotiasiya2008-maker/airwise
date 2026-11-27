@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { useLanguage } from "@/lib/i18n/context";
 import { HouseholdProfile } from "@/types/profile";
 import { CpcbCategory } from "@/types/air-quality";
 import { MessageSquare, Send, Loader2, Cpu, ShieldAlert, Sparkles } from "lucide-react";
+import { useFollowUpChat } from "@/hooks/useFollowUpChat";
 
 interface AskFollowUpChatProps {
   city: string;
@@ -15,12 +16,10 @@ interface AskFollowUpChatProps {
   profile: HouseholdProfile;
 }
 
-interface ChatMessage {
-  role: "user" | "assistant";
-  text: string;
-  engine?: "gemini" | "rule-based";
-}
-
+/**
+ * Grounded AI follow-up assistant enabling users to ask personalized queries
+ * (e.g. school morning walks, HEPA vs ionizer, commute safety) with prompt-injection defenses.
+ */
 export const AskFollowUpChat: React.FC<AskFollowUpChatProps> = ({
   city,
   aqi,
@@ -30,62 +29,21 @@ export const AskFollowUpChat: React.FC<AskFollowUpChatProps> = ({
   profile,
 }) => {
   const { t, language } = useLanguage();
-  const [question, setQuestion] = useState("");
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleAsk = async (textToAsk: string) => {
-    const trimmed = textToAsk.trim();
-    if (!trimmed || isLoading) return;
-
-    const userMsg: ChatMessage = { role: "user", text: trimmed };
-    setMessages((prev) => [...prev, userMsg]);
-    setQuestion("");
-    setIsLoading(true);
-
-    try {
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          question: trimmed,
-          city,
-          aqi,
-          pm25,
-          pm10,
-          category,
-          profile,
-          language,
-        }),
-      });
-
-      if (!res.ok) throw new Error("Chat request failed");
-
-      const data = await res.json();
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          text: data.answer,
-          engine: data.sourceEngine,
-        },
-      ]);
-    } catch {
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          text:
-            language === "hi"
-              ? "तकनीकी समस्या के कारण उत्तर नहीं मिला। कृपया पुनः प्रयास करें।"
-              : "Unable to reach assistant. Please retry with a shorter question.",
-          engine: "rule-based",
-        },
-      ]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const {
+    question,
+    setQuestion,
+    messages,
+    isLoading,
+    askQuestion,
+  } = useFollowUpChat({
+    city,
+    aqi,
+    pm25,
+    pm10,
+    category,
+    profile,
+    language,
+  });
 
   return (
     <section
@@ -98,82 +56,84 @@ export const AskFollowUpChat: React.FC<AskFollowUpChatProps> = ({
           <h2 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
             {t.chat.title}
           </h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             {t.chat.subtitle}
           </p>
         </div>
       </div>
 
-      {/* Suggested Chips */}
-      <div className="flex items-center gap-1.5 flex-wrap">
-        <span className="text-[11px] text-slate-400 flex items-center gap-1">
-          <Sparkles className="w-3 h-3 text-amber-500" />
-          <span>Suggestions:</span>
-        </span>
-        {t.chat.suggestedChips.map((chip, idx) => (
-          <button
-            key={idx}
-            type="button"
-            onClick={() => handleAsk(chip)}
-            className="text-xs px-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:border-blue-300 transition-colors"
-          >
-            {chip}
-          </button>
-        ))}
-      </div>
+      {/* Suggested Quick Prompt Chips */}
+      {messages.length === 0 && (
+        <div className="space-y-1.5">
+          <span className="text-[11px] font-semibold text-slate-400 block">
+            Suggested questions for today:
+          </span>
+          <div className="flex flex-wrap gap-2">
+            {(t.chat.suggestedChips || []).map((q: string, idx: number) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => askQuestion(q)}
+                className="text-xs px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 hover:border-blue-400 dark:hover:border-blue-600 transition-colors text-left flex items-center gap-1.5"
+              >
+                <Sparkles className="w-3 h-3 text-amber-500 shrink-0" />
+                <span>{q}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
-      {/* Message history */}
+      {/* Chat Conversation Thread */}
       {messages.length > 0 && (
-        <div className="space-y-3 max-h-80 overflow-y-auto p-3 rounded-xl bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 text-xs">
+        <div className="space-y-3 max-h-72 overflow-y-auto p-1">
           {messages.map((msg, i) => (
             <div
               key={i}
-              className={`p-3 rounded-xl ${
-                msg.role === "user"
-                  ? "bg-blue-600 text-white ml-auto max-w-[85%]"
-                  : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 max-w-[95%] space-y-1.5"
+              className={`flex flex-col ${
+                msg.role === "user" ? "items-end" : "items-start"
               }`}
             >
-              <div className="flex items-center justify-between gap-2 text-[10px] text-slate-400 font-semibold mb-0.5">
-                <span>{msg.role === "user" ? "You" : "AirWise Assistant"}</span>
-                {msg.engine && (
-                  <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-                    {msg.engine === "gemini" ? (
-                      <>
-                        <Cpu className="w-2.5 h-2.5 text-emerald-500" />
-                        <span>Gemini AI</span>
-                      </>
-                    ) : (
-                      <>
-                        <ShieldAlert className="w-2.5 h-2.5 text-amber-500" />
-                        <span>Rule Engine</span>
-                      </>
-                    )}
-                  </span>
-                )}
+              <div
+                className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-xs ${
+                  msg.role === "user"
+                    ? "bg-blue-600 text-white font-medium"
+                    : "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700/80"
+                }`}
+              >
+                <p className="whitespace-pre-line leading-relaxed">{msg.text}</p>
               </div>
-              <p className="leading-relaxed">{msg.text}</p>
+
+              {msg.role === "assistant" && msg.engine && (
+                <span className="text-[10px] text-slate-400 mt-1 flex items-center gap-1">
+                  <Cpu className="w-2.5 h-2.5" />
+                  <span>
+                    Answered by {msg.engine === "gemini" ? "Gemini 2.5 Flash" : "Rule-based engine"}
+                  </span>
+                </span>
+              )}
             </div>
           ))}
+
           {isLoading && (
-            <div className="flex items-center gap-2 text-slate-500 p-2">
-              <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-600" />
-              <span>Grounded analysis in progress...</span>
+            <div className="flex items-center gap-2 text-xs text-slate-400 p-2">
+              <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
+              <span>Analyzing live CPCB parameters & medical guidelines...</span>
             </div>
           )}
         </div>
       )}
 
-      {/* Input box */}
+      {/* Chat Input Bar */}
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          handleAsk(question);
+          askQuestion(question);
         }}
-        className="flex items-center gap-2"
+        className="flex items-center gap-2 pt-1"
       >
         <label htmlFor="followup-chat-input" className="sr-only">
-          Ask AirWise assistant
+          Ask question
         </label>
         <input
           id="followup-chat-input"
@@ -181,20 +141,21 @@ export const AskFollowUpChat: React.FC<AskFollowUpChatProps> = ({
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
           placeholder={t.chat.placeholder}
-          maxLength={300}
-          className="flex-1 py-2 px-3 text-xs sm:text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+          disabled={isLoading}
+          maxLength={200}
+          className="flex-1 px-4 py-2 text-xs bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white placeholder:text-slate-400"
         />
         <button
           type="submit"
-          disabled={!question.trim() || isLoading}
-          className="inline-flex items-center gap-1.5 px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 transition-colors shadow-sm"
+          disabled={isLoading || !question.trim()}
+          className="p-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 transition-colors shadow-sm"
+          aria-label="Send question"
         >
           {isLoading ? (
             <Loader2 className="w-4 h-4 animate-spin" />
           ) : (
             <Send className="w-4 h-4" />
           )}
-          <span className="hidden sm:inline">{t.chat.askButton}</span>
         </button>
       </form>
     </section>

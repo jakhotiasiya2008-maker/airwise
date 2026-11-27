@@ -16,3 +16,4 @@ yarn-error.log*
 .idea
 *.mp4
 *.webm
+coverage/

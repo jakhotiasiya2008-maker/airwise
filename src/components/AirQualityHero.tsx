@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { AirQualityReading } from "@/types/air-quality";
 import { getCpcbCategoryInfo } from "@/lib/cpcb/calculator";
 import { AirQualityRadialGauge } from "@/components/AirQualityRadialGauge";
-import { useLanguage } from "@/lib/i18n/context";
-import { MapPin, Clock, Database, Info, RefreshCw, Share2 } from "lucide-react";
+import { MapPin, Share2 } from "lucide-react";
+import { AirQualityMetricsGrid } from "./hero/AirQualityMetricsGrid";
+import { AirQualityMetaFooter } from "./hero/AirQualityMetaFooter";
 
 interface AirQualityHeroProps {
   reading: AirQualityReading;
@@ -15,6 +16,11 @@ interface AirQualityHeroProps {
   isRefreshing?: boolean;
 }
 
+/**
+ * Hero AQI Panel featuring animated radial gauge, CPCB category badge,
+ * plain-language headline, fine particulate tiles (PM2.5/PM10),
+ * and transparent live API data source attribution with IST timestamps.
+ */
 export const AirQualityHero: React.FC<AirQualityHeroProps> = ({
   reading,
   selectedCityName,
@@ -22,25 +28,9 @@ export const AirQualityHero: React.FC<AirQualityHeroProps> = ({
   onOpenShare,
   isRefreshing = false,
 }) => {
-  const { t } = useLanguage();
   const categoryInfo = getCpcbCategoryInfo(reading.cpcbCategory);
 
-  // Time elapsed since measurement
-  const [minutesAgo, setMinutesAgo] = useState(0);
-
-  useEffect(() => {
-    const updateElapsed = () => {
-      const diffMs = Date.now() - new Date(reading.timestampUtc).getTime();
-      const mins = Math.max(0, Math.floor(diffMs / 60000));
-      setMinutesAgo(mins);
-    };
-    updateElapsed();
-    const interval = setInterval(updateElapsed, 60000);
-    return () => clearInterval(interval);
-  }, [reading.timestampUtc]);
-
-  // One-line plain-language headline tailored to Indian smog
-  const getPlainLanguageHeadline = () => {
+  const getPlainLanguageHeadline = (): string => {
     switch (reading.cpcbCategory) {
       case "Severe":
         return "Air is severe today — suspend outdoor play and keep bedroom purifiers running.";
@@ -116,92 +106,22 @@ export const AirQualityHero: React.FC<AirQualityHeroProps> = ({
         </div>
 
         {/* Right: Key Pollutant Metrics */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 w-full lg:w-auto">
-          <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/50 p-3.5 text-center min-w-[100px]">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              {t.pm25}
-            </span>
-            <div className="mt-1 flex items-baseline justify-center gap-1">
-              <span className="text-2xl font-black text-slate-900 dark:text-white">
-                {reading.pm25}
-              </span>
-              <span className="text-[11px] text-slate-500">µg/m³</span>
-            </div>
-            <p className="text-[10px] text-slate-400 mt-0.5">CPCB std: 60</p>
-          </div>
-
-          <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/50 p-3.5 text-center min-w-[100px]">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              {t.pm10}
-            </span>
-            <div className="mt-1 flex items-baseline justify-center gap-1">
-              <span className="text-2xl font-black text-slate-900 dark:text-white">
-                {reading.pm10}
-              </span>
-              <span className="text-[11px] text-slate-500">µg/m³</span>
-            </div>
-            <p className="text-[10px] text-slate-400 mt-0.5">CPCB std: 100</p>
-          </div>
-
-          {reading.usAqi !== undefined && (
-            <div className="col-span-2 sm:col-span-1 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/50 p-3.5 text-center min-w-[100px]">
-              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                US AQI
-              </span>
-              <div className="mt-1 flex items-baseline justify-center gap-1">
-                <span className="text-2xl font-black text-slate-900 dark:text-white">
-                  {reading.usAqi}
-                </span>
-                <span className="text-[11px] text-slate-500">index</span>
-              </div>
-              <p className="text-[10px] text-slate-400 mt-0.5">EPA standard</p>
-            </div>
-          )}
-        </div>
+        <AirQualityMetricsGrid
+          pm25={reading.pm25}
+          pm10={reading.pm10}
+          usAqi={reading.usAqi}
+        />
       </div>
 
-      {/* Metadata Bar (Hard Rule 2: source, station, timestamp IST + refreshed X mins ago) */}
-      <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400">
-        <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-          <div className="flex items-center gap-1.5" title="Data provider">
-            <Database className="w-3.5 h-3.5 text-slate-400" aria-hidden="true" />
-            <span>
-              {t.source}: <strong className="font-semibold text-slate-700 dark:text-slate-300">{reading.source}</strong>
-            </span>
-          </div>
-
-          <div className="flex items-center gap-1.5" title="Official measurement time in Indian Standard Time">
-            <Clock className="w-3.5 h-3.5 text-slate-400" aria-hidden="true" />
-            <span>
-              {t.measured}: <strong className="font-semibold text-slate-700 dark:text-slate-300">{reading.timestampIst}</strong>
-              <span className="text-slate-400 ml-1">
-                ({minutesAgo === 0 ? "just now" : `${minutesAgo}m ago`})
-              </span>
-            </span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          {onRefresh && (
-            <button
-              type="button"
-              onClick={onRefresh}
-              disabled={isRefreshing}
-              className="inline-flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 disabled:opacity-50"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin" : ""}`} />
-              <span>{t.refresh}</span>
-            </button>
-          )}
-
-          {reading.isModelled && (
-            <div className="flex items-center gap-1 text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-800/50 text-[11px]">
-              <Info className="w-3 h-3 shrink-0" aria-hidden="true" />
-              <span>{t.modelledNote}</span>
-            </div>
-          )}
-        </div>
-      </div>
+      {/* Metadata Bar */}
+      <AirQualityMetaFooter
+        source={reading.source}
+        timestampUtc={reading.timestampUtc}
+        timestampIst={reading.timestampIst}
+        isModelled={reading.isModelled}
+        onRefresh={onRefresh}
+        isRefreshing={isRefreshing}
+      />
     </section>
   );
 };

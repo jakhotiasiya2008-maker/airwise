@@ -3,9 +3,12 @@
 import React, { useState } from "react";
 import { useLanguage } from "@/lib/i18n/context";
 import { CityLocation } from "@/types/air-quality";
-import { HouseholdProfile, CommuteMode } from "@/types/profile";
+import { HouseholdProfile } from "@/types/profile";
 import { DEFAULT_CITIES } from "@/lib/constants/cities";
-import { Wind, ArrowRight, ArrowLeft, Check, Sparkles, X } from "lucide-react";
+import { Wind, ArrowRight, ArrowLeft, Sparkles, X } from "lucide-react";
+import { CityStep } from "./onboarding/CityStep";
+import { HouseholdStep } from "./onboarding/HouseholdStep";
+import { HabitsStep } from "./onboarding/HabitsStep";
 
 interface OnboardingWizardProps {
   isOpen: boolean;
@@ -13,6 +16,12 @@ interface OnboardingWizardProps {
   onSkip: () => void;
 }
 
+/**
+ * First-visit 3-step onboarding wizard.
+ * Step 1: City selection
+ * Step 2: Household demographics & vulnerable members
+ * Step 3: Habits & purification appliances
+ */
 export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({
   isOpen,
   onComplete,
@@ -81,143 +90,15 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({
           </div>
         </div>
 
-        {/* Step 1: Pick City */}
+        {/* Dynamic Step Content */}
         {step === 1 && (
-          <div className="space-y-4">
-            <div>
-              <h2 id="onboarding-title" className="text-xl font-extrabold text-slate-900 dark:text-white">
-                {t.onboarding.step1Title}
-              </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                {t.onboarding.step1Desc}
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto">
-              {DEFAULT_CITIES.map((city) => (
-                <button
-                  key={city.id}
-                  type="button"
-                  onClick={() => setSelectedCity(city)}
-                  className={`p-3 rounded-2xl border text-left text-xs font-semibold transition-all ${
-                    selectedCity.id === city.id
-                      ? "border-blue-600 bg-blue-50/80 dark:bg-blue-950/50 text-blue-900 dark:text-blue-100 ring-1 ring-blue-600"
-                      : "border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800"
-                  }`}
-                >
-                  <span className="block font-bold">{city.name}</span>
-                  <span className="text-[11px] text-slate-400">{city.state}</span>
-                </button>
-              ))}
-            </div>
-          </div>
+          <CityStep selectedCity={selectedCity} onSelectCity={setSelectedCity} />
         )}
-
-        {/* Step 2: Household Demographics */}
         {step === 2 && (
-          <div className="space-y-4">
-            <div>
-              <h2 id="onboarding-title" className="text-xl font-extrabold text-slate-900 dark:text-white">
-                {t.onboarding.step2Title}
-              </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                {t.onboarding.step2Desc}
-              </p>
-            </div>
-
-            <div className="space-y-2 text-xs">
-              <label className="flex items-center gap-3 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                <input
-                  type="checkbox"
-                  checked={profile.hasYoungChildren}
-                  onChange={(e) => setProfile({ ...profile, hasYoungChildren: e.target.checked })}
-                  className="w-4 h-4 rounded text-blue-600"
-                />
-                <span className="font-medium text-slate-800 dark:text-slate-200">
-                  Young Children or Toddlers (Developing lungs)
-                </span>
-              </label>
-
-              <label className="flex items-center gap-3 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                <input
-                  type="checkbox"
-                  checked={profile.hasSeniors}
-                  onChange={(e) => setProfile({ ...profile, hasSeniors: e.target.checked })}
-                  className="w-4 h-4 rounded text-blue-600"
-                />
-                <span className="font-medium text-slate-800 dark:text-slate-200">
-                  Senior Citizens 60+ (Higher cardiovascular smog risk)
-                </span>
-              </label>
-
-              <label className="flex items-center gap-3 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                <input
-                  type="checkbox"
-                  checked={profile.hasRespiratorySensitivity}
-                  onChange={(e) => setProfile({ ...profile, hasRespiratorySensitivity: e.target.checked })}
-                  className="w-4 h-4 rounded text-blue-600"
-                />
-                <span className="font-medium text-rose-700 dark:text-rose-400 font-semibold">
-                  Asthma, Bronchitis or Allergy Sensitivity
-                </span>
-              </label>
-            </div>
-          </div>
+          <HouseholdStep profile={profile} onChangeProfile={setProfile} />
         )}
-
-        {/* Step 3: Habits & Appliances */}
         {step === 3 && (
-          <div className="space-y-4">
-            <div>
-              <h2 id="onboarding-title" className="text-xl font-extrabold text-slate-900 dark:text-white">
-                {t.onboarding.step3Title}
-              </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                {t.onboarding.step3Desc}
-              </p>
-            </div>
-
-            <div className="space-y-3">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                  Primary Commute Mode
-                </label>
-                <select
-                  value={profile.commuteMode}
-                  onChange={(e) => setProfile({ ...profile, commuteMode: e.target.value as CommuteMode })}
-                  className="w-full py-2 px-3 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
-                >
-                  <option value="metro">Metro Rail</option>
-                  <option value="bike">Motorcycle / Scooter</option>
-                  <option value="bus">Public Bus</option>
-                  <option value="car">Personal Car</option>
-                  <option value="walk">Walking / Bicycle</option>
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <label className="flex items-center gap-2 p-3 rounded-xl border border-slate-200 dark:border-slate-800 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={profile.hasAirPurifier}
-                    onChange={(e) => setProfile({ ...profile, hasAirPurifier: e.target.checked })}
-                    className="w-4 h-4 rounded text-blue-600"
-                  />
-                  <span>Has Air Purifier</span>
-                </label>
-
-                <label className="flex items-center gap-2 p-3 rounded-xl border border-slate-200 dark:border-slate-800 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={profile.hasIndoorPlants}
-                    onChange={(e) => setProfile({ ...profile, hasIndoorPlants: e.target.checked })}
-                    className="w-4 h-4 rounded text-blue-600"
-                  />
-                  <span>Has Houseplants</span>
-                </label>
-              </div>
-            </div>
-          </div>
+          <HabitsStep profile={profile} onChangeProfile={setProfile} />
         )}
 
         {/* Action Buttons */}
