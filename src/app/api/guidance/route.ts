@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { applyRateLimit, errorResponse } from "@/lib/api-utils";
 import { GuidanceRequestSchema } from "@/lib/validation/schemas";
 import { generateAiGuidance } from "@/lib/ai/gemini";
+import { logger } from "@/lib/logger";
 import {
   buildGuidanceCacheKey,
   GUIDANCE_CACHE_TTL_MS,
@@ -51,10 +52,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(guidance);
   } catch (error) {
-    console.error("Guidance route error:", error);
-    return errorResponse(
-      "Unable to generate recommendations. Please retry.",
-      500
-    );
+    logger.error("Guidance route error:", error);
+    return errorResponse("Unable to generate recommendations. Please retry.", 500);
   }
 }

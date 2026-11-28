@@ -1,5 +1,6 @@
 import { CityLocation } from "@/types/air-quality";
 import { DEFAULT_CITIES } from "@/lib/constants/cities";
+import { APP_CONFIG } from "@/lib/constants/config";
 
 export async function searchCitiesInIndia(query: string): Promise<CityLocation[]> {
   const trimmed = query.trim();
@@ -8,13 +9,14 @@ export async function searchCitiesInIndia(query: string): Promise<CityLocation[]
   }
 
   // First search our instant local fallback list for fast match
-  const localMatches = DEFAULT_CITIES.filter((city) =>
-    city.name.toLowerCase().includes(trimmed.toLowerCase()) ||
-    (city.state && city.state.toLowerCase().includes(trimmed.toLowerCase()))
+  const localMatches = DEFAULT_CITIES.filter(
+    (city) =>
+      city.name.toLowerCase().includes(trimmed.toLowerCase()) ||
+      (city.state && city.state.toLowerCase().includes(trimmed.toLowerCase()))
   );
 
   try {
-    const url = new URL("https://geocoding-api.open-meteo.com/v1/search");
+    const url = new URL(APP_CONFIG.endpoints.openMeteoGeocoding);
     url.searchParams.set("name", trimmed);
     url.searchParams.set("count", "10");
     url.searchParams.set("language", "en");
@@ -22,7 +24,7 @@ export async function searchCitiesInIndia(query: string): Promise<CityLocation[]
     url.searchParams.set("country_code", "IN");
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000);
+    const timeout = setTimeout(() => controller.abort(), APP_CONFIG.defaults.timeoutMs.geocoding);
 
     const response = await fetch(url.toString(), {
       signal: controller.signal,
@@ -53,7 +55,11 @@ export async function searchCitiesInIndia(query: string): Promise<CityLocation[]
     }
 
     const apiResults: CityLocation[] = (data.results as ApiResult[])
-      .filter((item) => (item.country_code || "").toUpperCase() === "IN" || (item.country || "").toLowerCase() === "india")
+      .filter(
+        (item) =>
+          (item.country_code || "").toUpperCase() === "IN" ||
+          (item.country || "").toLowerCase() === "india"
+      )
       .map((item) => ({
         id: item.id,
         name: item.name,

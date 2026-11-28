@@ -8,10 +8,7 @@ interface ApplianceCheckboxesProps {
   onChange: (updated: HouseholdProfile) => void;
 }
 
-export const ApplianceCheckboxes: React.FC<ApplianceCheckboxesProps> = ({
-  profile,
-  onChange,
-}) => {
+export const ApplianceCheckboxes: React.FC<ApplianceCheckboxesProps> = ({ profile, onChange }) => {
   return (
     <div>
       <span className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">

@@ -43,7 +43,10 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
       <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-5">
         <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
           <div>
-            <h2 id="profile-modal-title" className="text-lg font-bold text-slate-900 dark:text-white">
+            <h2
+              id="profile-modal-title"
+              className="text-lg font-bold text-slate-900 dark:text-white"
+            >
               Household Vulnerability Profile
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -75,7 +78,9 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
             <select
               id="commute-mode-select"
               value={formData.commuteMode}
-              onChange={(e) => setFormData({ ...formData, commuteMode: e.target.value as CommuteMode })}
+              onChange={(e) =>
+                setFormData({ ...formData, commuteMode: e.target.value as CommuteMode })
+              }
               className="w-full py-2 px-3 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
             >
               <option value="metro">Metro Rail (Protected subterranean/cabin)</option>

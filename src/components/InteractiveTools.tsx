@@ -21,11 +21,7 @@ interface InteractiveToolsProps {
  * 2. Commute mode what-if exposure analyzer.
  * 3. Health-based safe outdoor exposure window calculator.
  */
-export const InteractiveTools: React.FC<InteractiveToolsProps> = ({
-  aqi,
-  category,
-  profile,
-}) => {
+export const InteractiveTools: React.FC<InteractiveToolsProps> = ({ aqi, category, profile }) => {
   const { t } = useLanguage();
 
   return (
@@ -35,9 +31,7 @@ export const InteractiveTools: React.FC<InteractiveToolsProps> = ({
           <Sliders className="w-5 h-5 text-blue-600 dark:text-blue-400" />
           <span>{t.tools.title}</span>
         </h2>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-          {t.tools.subtitle}
-        </p>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{t.tools.subtitle}</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

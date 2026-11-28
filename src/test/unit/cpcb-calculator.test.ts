@@ -1,9 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  calculateCpcbAqi,
-  getCpcbCategory,
-  getCpcbCategoryInfo,
-} from "@/lib/cpcb/calculator";
+import { calculateCpcbAqi, getCpcbCategory, getCpcbCategoryInfo } from "@/lib/cpcb/calculator";
 
 describe("CPCB AQI Calculator", () => {
   it("correctly calculates Good category (AQI 0-50)", () => {

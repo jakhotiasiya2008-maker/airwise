@@ -42,7 +42,8 @@ export const PersonaSelector: React.FC<PersonaSelectorProps> = ({
             <span>Target Persona & Household Context</span>
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Guidance, urgency ratings, and health warnings automatically adapt to your chosen persona.
+            Guidance, urgency ratings, and health warnings automatically adapt to your chosen
+            persona.
           </p>
         </div>
 

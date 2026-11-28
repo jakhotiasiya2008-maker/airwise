@@ -142,8 +142,6 @@ describe("GuidanceSectionView & LocationSearch Component Tests", () => {
     fireEvent.click(mumbaiChip);
 
     expect(handleSelectCity).toHaveBeenCalledTimes(1);
-    expect(handleSelectCity).toHaveBeenCalledWith(
-      expect.objectContaining({ name: "Mumbai" })
-    );
+    expect(handleSelectCity).toHaveBeenCalledWith(expect.objectContaining({ name: "Mumbai" }));
   });
 });

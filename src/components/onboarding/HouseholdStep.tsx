@@ -18,9 +18,7 @@ export const HouseholdStep: React.FC<HouseholdStepProps> = ({ profile, onChangeP
         <h2 id="onboarding-title" className="text-xl font-extrabold text-slate-900 dark:text-white">
           {t.onboarding.step2Title}
         </h2>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-          {t.onboarding.step2Desc}
-        </p>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t.onboarding.step2Desc}</p>
       </div>
 
       <div className="space-y-2 text-xs">
@@ -52,7 +50,9 @@ export const HouseholdStep: React.FC<HouseholdStepProps> = ({ profile, onChangeP
           <input
             type="checkbox"
             checked={profile.hasRespiratorySensitivity}
-            onChange={(e) => onChangeProfile({ ...profile, hasRespiratorySensitivity: e.target.checked })}
+            onChange={(e) =>
+              onChangeProfile({ ...profile, hasRespiratorySensitivity: e.target.checked })
+            }
             className="w-4 h-4 rounded text-blue-600"
           />
           <span className="font-medium text-rose-700 dark:text-rose-400 font-semibold">

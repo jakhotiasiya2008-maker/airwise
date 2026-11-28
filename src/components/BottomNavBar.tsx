@@ -9,10 +9,7 @@ interface BottomNavBarProps {
   onOpenTools: () => void;
 }
 
-export const BottomNavBar: React.FC<BottomNavBarProps> = ({
-  onOpenProfile,
-  onOpenTools,
-}) => {
+export const BottomNavBar: React.FC<BottomNavBarProps> = ({ onOpenProfile, onOpenTools }) => {
   const { t } = useLanguage();
 
   return (

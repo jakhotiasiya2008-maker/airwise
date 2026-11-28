@@ -12,7 +12,10 @@ import {
 } from "recharts";
 import { HourlyForecastPoint } from "@/types/air-quality";
 import { useLanguage } from "@/lib/i18n/context";
-import { Sun, AlertTriangle, Table } from "lucide-react";
+import { Table } from "lucide-react";
+import { ForecastTooltip } from "./forecast/ForecastTooltip";
+import { ForecastTableFallback } from "./forecast/ForecastTableFallback";
+import { ForecastWindowPills } from "./forecast/ForecastWindowPills";
 
 interface ForecastChartProps {
   forecast?: HourlyForecastPoint[];
@@ -40,9 +43,7 @@ export const ForecastChart: React.FC<ForecastChartProps> = ({
           <h2 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
             {t.forecast.title}
           </h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            {t.forecast.subtitle}
-          </p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">{t.forecast.subtitle}</p>
         </div>
 
         {/* Table toggle button for accessibility */}
@@ -58,35 +59,12 @@ export const ForecastChart: React.FC<ForecastChartProps> = ({
       </div>
 
       {/* Window Callout Pills */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {bestWindow && (
-          <div className="p-3 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 flex items-start gap-2.5">
-            <Sun className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
-            <div>
-              <span className="text-xs font-bold text-emerald-950 dark:text-emerald-300 block">
-                {t.forecast.bestWindow}: {bestWindow.start}
-              </span>
-              <p className="text-[11px] text-emerald-800 dark:text-emerald-400 mt-0.5">
-                {bestWindow.reason}
-              </p>
-            </div>
-          </div>
-        )}
-
-        {avoidWindow && (
-          <div className="p-3 rounded-xl bg-rose-50/70 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 flex items-start gap-2.5">
-            <AlertTriangle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
-            <div>
-              <span className="text-xs font-bold text-rose-950 dark:text-rose-300 block">
-                {t.forecast.avoidWindow}: {avoidWindow.start}
-              </span>
-              <p className="text-[11px] text-rose-800 dark:text-rose-400 mt-0.5">
-                {avoidWindow.reason}
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
+      <ForecastWindowPills
+        bestWindow={bestWindow}
+        avoidWindow={avoidWindow}
+        bestLabel={t.forecast.bestWindow}
+        avoidLabel={t.forecast.avoidWindow}
+      />
 
       {/* Main Chart or Table Fallback */}
       {!showTableFallback ? (
@@ -113,36 +91,40 @@ export const ForecastChart: React.FC<ForecastChartProps> = ({
                 axisLine={false}
                 tickLine={false}
               />
-              <Tooltip
-                content={({ active, payload }) => {
-                  if (active && payload && payload.length) {
-                    const data = payload[0].payload as HourlyForecastPoint;
-                    return (
-                      <div className="p-2.5 rounded-xl bg-slate-900 text-white text-xs shadow-xl border border-slate-700 space-y-1">
-                        <span className="font-bold block text-blue-400">{data.hourLabel}</span>
-                        <div className="flex items-center gap-1.5">
-                          <span>CPCB AQI:</span>
-                          <strong className="text-sm font-extrabold">{data.aqi}</strong>
-                          <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-800">
-                            {data.category}
-                          </span>
-                        </div>
-                        <div className="text-[11px] text-slate-300">
-                          PM2.5: {data.pm25} µg/m³ • PM10: {data.pm10} µg/m³
-                        </div>
-                      </div>
-                    );
-                  }
-                  return null;
+              <Tooltip content={<ForecastTooltip />} />
+              <ReferenceLine
+                y={100}
+                stroke="#10b981"
+                strokeDasharray="3 3"
+                label={{
+                  value: "Satisfactory (100)",
+                  fill: "#10b981",
+                  fontSize: 10,
+                  position: "insideTopLeft",
                 }}
               />
-              {/* Reference line for CPCB Satisfactory standard (100) */}
-              <ReferenceLine y={100} stroke="#10b981" strokeDasharray="3 3" label={{ value: "Satisfactory (100)", fill: "#10b981", fontSize: 10, position: "insideTopLeft" }} />
-              {/* Reference line for CPCB Poor threshold (200) */}
-              <ReferenceLine y={200} stroke="#f97316" strokeDasharray="3 3" label={{ value: "Poor (200)", fill: "#f97316", fontSize: 10, position: "insideTopLeft" }} />
-              {/* Reference line for Severe threshold (400) */}
-              <ReferenceLine y={400} stroke="#dc2626" strokeDasharray="3 3" label={{ value: "Severe (400)", fill: "#dc2626", fontSize: 10, position: "insideTopLeft" }} />
-
+              <ReferenceLine
+                y={200}
+                stroke="#f97316"
+                strokeDasharray="3 3"
+                label={{
+                  value: "Poor (200)",
+                  fill: "#f97316",
+                  fontSize: 10,
+                  position: "insideTopLeft",
+                }}
+              />
+              <ReferenceLine
+                y={400}
+                stroke="#dc2626"
+                strokeDasharray="3 3"
+                label={{
+                  value: "Severe (400)",
+                  fill: "#dc2626",
+                  fontSize: 10,
+                  position: "insideTopLeft",
+                }}
+              />
               <Area
                 type="monotone"
                 dataKey="aqi"
@@ -155,32 +137,7 @@ export const ForecastChart: React.FC<ForecastChartProps> = ({
           </ResponsiveContainer>
         </div>
       ) : (
-        /* Accessible Text Table Fallback */
-        <div className="overflow-x-auto max-h-72 border border-slate-200 dark:border-slate-800 rounded-xl">
-          <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300">
-            <caption className="sr-only">Hourly Air Quality Forecast Table</caption>
-            <thead className="bg-slate-50 dark:bg-slate-800 font-semibold sticky top-0 border-b border-slate-200 dark:border-slate-700">
-              <tr>
-                <th scope="col" className="p-2.5">Time</th>
-                <th scope="col" className="p-2.5">CPCB AQI</th>
-                <th scope="col" className="p-2.5">Category</th>
-                <th scope="col" className="p-2.5">PM2.5 (µg/m³)</th>
-                <th scope="col" className="p-2.5">Recommendation</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {forecast.map((h, i) => (
-                <tr key={i} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
-                  <td className="p-2.5 font-medium">{h.hourLabel}</td>
-                  <td className="p-2.5 font-bold">{h.aqi}</td>
-                  <td className="p-2.5">{h.category}</td>
-                  <td className="p-2.5">{h.pm25}</td>
-                  <td className="p-2.5 capitalize">{h.recommendation}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <ForecastTableFallback forecast={forecast} />
       )}
     </section>
   );

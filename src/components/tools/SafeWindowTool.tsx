@@ -19,7 +19,8 @@ export const SafeWindowTool: React.FC<SafeWindowToolProps> = ({ aqi, category, p
   const { t } = useLanguage();
 
   const calculateSafeExposureMinutes = (): string => {
-    const isSensitive = profile.hasYoungChildren || profile.hasSeniors || profile.hasRespiratorySensitivity;
+    const isSensitive =
+      profile.hasYoungChildren || profile.hasSeniors || profile.hasRespiratorySensitivity;
     if (aqi > 400) return isSensitive ? "10 - 15 mins (Emergency only)" : "20 - 30 mins max";
     if (aqi > 300) return isSensitive ? "20 - 30 mins" : "45 - 60 mins";
     if (aqi > 200) return isSensitive ? "45 - 60 mins" : "90 - 120 mins";
@@ -35,14 +36,15 @@ export const SafeWindowTool: React.FC<SafeWindowToolProps> = ({ aqi, category, p
           {t.tools.exposureTimelineTitle}
         </h3>
       </div>
-      <p className="text-xs text-slate-500 dark:text-slate-400">
-        {t.tools.exposureTimelineDesc}
-      </p>
+      <p className="text-xs text-slate-500 dark:text-slate-400">{t.tools.exposureTimelineDesc}</p>
 
       <div className="p-4 rounded-xl bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <span className="text-xs text-blue-800 dark:text-blue-300 font-medium">
-            Current AQI: <strong className="font-bold">{aqi} ({category})</strong>
+            Current AQI:{" "}
+            <strong className="font-bold">
+              {aqi} ({category})
+            </strong>
           </span>
           <p className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">
             Safe Outdoor Duration: {calculateSafeExposureMinutes()}

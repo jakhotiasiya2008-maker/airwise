@@ -31,7 +31,8 @@ describe("Accessibility (WCAG 2.2 AA) Compliance Tests", () => {
     headline: "Severe Air Quality Alert (AQI 312)",
     summary: "Fine particulate PM2.5 is high; avoid prolonged outdoor exertion.",
     sensitiveGroupWarning: "Young children and seniors should stay in filtered indoor spaces.",
-    disclaimer: "Informational guidance only. Not medical advice. Consult a healthcare professional.",
+    disclaimer:
+      "Informational guidance only. Not medical advice. Consult a healthcare professional.",
   };
 
   it("Header satisfies axe accessibility rules", async () => {
@@ -54,9 +55,7 @@ describe("Accessibility (WCAG 2.2 AA) Compliance Tests", () => {
   });
 
   it("AirQualityRadialGauge meter role satisfies axe rules", async () => {
-    const { container } = render(
-      <AirQualityRadialGauge aqi={312} category="Very Poor" />
-    );
+    const { container } = render(<AirQualityRadialGauge aqi={312} category="Very Poor" />);
 
     const results = await axe.run(container);
     const violations = results.violations.filter((v) => v.id !== "region");
@@ -67,10 +66,7 @@ describe("Accessibility (WCAG 2.2 AA) Compliance Tests", () => {
     const { container } = render(
       <LanguageProvider>
         <div className="dark">
-          <AirQualityHero
-            reading={mockReading}
-            selectedCityName="Delhi (NCR)"
-          />
+          <AirQualityHero reading={mockReading} selectedCityName="Delhi (NCR)" />
         </div>
       </LanguageProvider>
     );
@@ -81,9 +77,7 @@ describe("Accessibility (WCAG 2.2 AA) Compliance Tests", () => {
   });
 
   it("HealthAdvisoryBanner satisfies axe accessibility rules", async () => {
-    const { container } = render(
-      <HealthAdvisoryBanner advisory={mockAdvisory} />
-    );
+    const { container } = render(<HealthAdvisoryBanner advisory={mockAdvisory} />);
 
     const results = await axe.run(container);
     const violations = results.violations.filter((v) => v.id !== "region");

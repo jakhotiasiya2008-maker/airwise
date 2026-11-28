@@ -24,23 +24,27 @@ export const GuidanceCardItem: React.FC<GuidanceCardItemProps> = ({
       case "critical":
         return {
           label: t.urgency.now,
-          classes: "bg-red-100 text-red-800 dark:bg-red-950/80 dark:text-red-300 border-red-200 dark:border-red-800",
+          classes:
+            "bg-red-100 text-red-800 dark:bg-red-950/80 dark:text-red-300 border-red-200 dark:border-red-800",
         };
       case "high":
         return {
           label: t.urgency.today,
-          classes: "bg-orange-100 text-orange-800 dark:bg-orange-950/80 dark:text-orange-300 border-orange-200 dark:border-orange-800",
+          classes:
+            "bg-orange-100 text-orange-800 dark:bg-orange-950/80 dark:text-orange-300 border-orange-200 dark:border-orange-800",
         };
       case "medium":
         return {
           label: t.urgency.thisWeek,
-          classes: "bg-blue-100 text-blue-800 dark:bg-blue-950/80 dark:text-blue-300 border-blue-200 dark:border-blue-800",
+          classes:
+            "bg-blue-100 text-blue-800 dark:bg-blue-950/80 dark:text-blue-300 border-blue-200 dark:border-blue-800",
         };
       case "low":
       default:
         return {
           label: t.urgency.preventive,
-          classes: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700",
+          classes:
+            "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700",
         };
     }
   };
@@ -86,7 +90,9 @@ export const GuidanceCardItem: React.FC<GuidanceCardItemProps> = ({
         <h3
           id={`card-title-${card.id}`}
           className={`text-sm sm:text-base font-bold leading-snug ${
-            isDone ? "line-through text-slate-500 dark:text-slate-400" : "text-slate-900 dark:text-white"
+            isDone
+              ? "line-through text-slate-500 dark:text-slate-400"
+              : "text-slate-900 dark:text-white"
           }`}
         >
           {card.title}
@@ -94,7 +100,10 @@ export const GuidanceCardItem: React.FC<GuidanceCardItemProps> = ({
 
         {/* Action item (What to do) */}
         <div className="flex items-start gap-2 pt-1 text-xs sm:text-sm text-slate-700 dark:text-slate-200">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" aria-hidden="true" />
+          <CheckCircle2
+            className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5"
+            aria-hidden="true"
+          />
           <p className="font-medium leading-relaxed">{card.action}</p>
         </div>
       </div>
@@ -108,8 +117,14 @@ export const GuidanceCardItem: React.FC<GuidanceCardItemProps> = ({
             className="w-full flex items-center justify-between text-left font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-800 py-1"
             aria-expanded={isExpanded}
           >
-            <span>{t.cards.whyThisMatters} & {t.cards.expectedImpact}</span>
-            {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+            <span>
+              {t.cards.whyThisMatters} & {t.cards.expectedImpact}
+            </span>
+            {isExpanded ? (
+              <ChevronUp className="w-3.5 h-3.5" />
+            ) : (
+              <ChevronDown className="w-3.5 h-3.5" />
+            )}
           </button>
         </div>
 

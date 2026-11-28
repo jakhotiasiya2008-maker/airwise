@@ -41,8 +41,8 @@ describe("OpenMeteoAirQualityProvider", () => {
     });
 
     const provider = new OpenMeteoAirQualityProvider();
-    await expect(
-      provider.fetchCurrentAirQuality(28.6139, 77.209, "Delhi (NCR)")
-    ).rejects.toThrow("Open-Meteo API returned status 500");
+    await expect(provider.fetchCurrentAirQuality(28.6139, 77.209, "Delhi (NCR)")).rejects.toThrow(
+      "Open-Meteo API returned status 500"
+    );
   });
 });

@@ -5,7 +5,8 @@ export const PERSONA_PRESETS: PersonaPreset[] = [
     id: "vulnerable_family",
     name: "Vulnerable Urban Family (Children & Elderly)",
     badge: "Flagship Persona",
-    tagline: "Multigenerational home with infants/toddlers and senior grandparents vulnerable to smog spikes.",
+    tagline:
+      "Multigenerational home with infants/toddlers and senior grandparents vulnerable to smog spikes.",
     profile: {
       hasYoungChildren: true,
       hasSeniors: true,
@@ -15,7 +16,8 @@ export const PERSONA_PRESETS: PersonaPreset[] = [
       commuteMode: "car",
       hasAirPurifier: true,
       hasIndoorPlants: true,
-      customNotes: "Focus on nursery PM2.5 levels, evening medication timings, avoiding agarbatti smoke.",
+      customNotes:
+        "Focus on nursery PM2.5 levels, evening medication timings, avoiding agarbatti smoke.",
     },
     focusHighlights: [
       "Strict indoor air filtration in children's & elders' bedrooms",
@@ -27,7 +29,8 @@ export const PERSONA_PRESETS: PersonaPreset[] = [
     id: "two_wheeler_commuter",
     name: "Daily Two-Wheeler Commuter",
     badge: "High Exposure",
-    tagline: "Rides a motorbike/scooter through arterial corridors during morning and evening rush hours.",
+    tagline:
+      "Rides a motorbike/scooter through arterial corridors during morning and evening rush hours.",
     profile: {
       hasYoungChildren: false,
       hasSeniors: false,

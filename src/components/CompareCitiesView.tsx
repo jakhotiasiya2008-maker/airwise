@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { AirQualityReading, CityLocation } from "@/types/air-quality";
 import { getCpcbCategoryInfo } from "@/lib/cpcb/calculator";
 import { ArrowLeftRight, Loader2, RefreshCw } from "lucide-react";
+import { logger } from "@/lib/logger";
 
 interface ComparisonItem {
   city: CityLocation;
@@ -22,7 +23,7 @@ export const CompareCitiesView: React.FC = () => {
         setComparisons(data.comparisons || []);
       }
     } catch (err) {
-      console.warn("Failed to load comparisons:", err);
+      logger.warn("Failed to load comparisons:", err);
     } finally {
       setIsLoading(false);
     }
@@ -63,6 +64,18 @@ export const CompareCitiesView: React.FC = () => {
               <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
               <span>Fetching live sensor data across Indian metros...</span>
             </div>
+          ) : comparisons.length === 0 ? (
+            <div className="p-6 text-center text-xs text-slate-500 space-y-2">
+              <p>Comparison data currently unavailable. Check internet connection or retry.</p>
+              <button
+                type="button"
+                onClick={fetchCompareData}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 font-semibold"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>Retry Loading</span>
+              </button>
+            </div>
           ) : (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -73,7 +86,9 @@ export const CompareCitiesView: React.FC = () => {
                         key={city.id}
                         className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40"
                       >
-                        <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300">{city.name}</h4>
+                        <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                          {city.name}
+                        </h4>
                         <p className="text-xs text-slate-400 mt-1">Data currently unavailable</p>
                       </div>
                     );
@@ -87,7 +102,9 @@ export const CompareCitiesView: React.FC = () => {
                       className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/50 space-y-2"
                     >
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-slate-900 dark:text-white">{city.name}</span>
+                        <span className="text-xs font-bold text-slate-900 dark:text-white">
+                          {city.name}
+                        </span>
                         <span
                           className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${categoryInfo.bgClass} ${categoryInfo.colorClass} ${categoryInfo.borderClass}`}
                         >
@@ -102,7 +119,11 @@ export const CompareCitiesView: React.FC = () => {
                           <span className="text-[10px] text-slate-400 ml-1">CPCB AQI</span>
                         </div>
                         <div className="text-right text-[11px] text-slate-500 dark:text-slate-400">
-                          PM2.5: <strong className="text-slate-700 dark:text-slate-300">{reading.pm25}</strong> µg/m³
+                          PM2.5:{" "}
+                          <strong className="text-slate-700 dark:text-slate-300">
+                            {reading.pm25}
+                          </strong>{" "}
+                          µg/m³
                         </div>
                       </div>
                     </div>

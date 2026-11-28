@@ -10,7 +10,8 @@ describe("GuidanceCardItem Component", () => {
     id: "test-card-1",
     title: "Shift Routine to Midday",
     action: "Postpone morning walks until after 11 AM when boundary layer lifts.",
-    whyThisMatters: "Nocturnal temperature inversions trap vehicular particulate pollution near surface.",
+    whyThisMatters:
+      "Nocturnal temperature inversions trap vehicular particulate pollution near surface.",
     expectedImpact: "Lowers immediate respiratory particle intake by up to 35%.",
     urgency: "critical",
     tags: ["Timing", "Inversion"],

@@ -18,9 +18,7 @@ export const HabitsStep: React.FC<HabitsStepProps> = ({ profile, onChangeProfile
         <h2 id="onboarding-title" className="text-xl font-extrabold text-slate-900 dark:text-white">
           {t.onboarding.step3Title}
         </h2>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-          {t.onboarding.step3Desc}
-        </p>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t.onboarding.step3Desc}</p>
       </div>
 
       <div className="space-y-3">
@@ -30,7 +28,9 @@ export const HabitsStep: React.FC<HabitsStepProps> = ({ profile, onChangeProfile
           </label>
           <select
             value={profile.commuteMode}
-            onChange={(e) => onChangeProfile({ ...profile, commuteMode: e.target.value as CommuteMode })}
+            onChange={(e) =>
+              onChangeProfile({ ...profile, commuteMode: e.target.value as CommuteMode })
+            }
             className="w-full py-2 px-3 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
           >
             <option value="metro">Metro Rail</option>

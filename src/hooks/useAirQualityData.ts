@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect } from "react";
 import { CityLocation, AirQualityReading } from "@/types/air-quality";
 import { HouseholdProfile } from "@/types/profile";
 import { GuidanceResponse } from "@/types/guidance";
+import { logger } from "@/lib/logger";
 
 const LAST_AQ_STORAGE_KEY = "airwise_last_aq_reading";
 
@@ -13,7 +14,11 @@ export interface UseAirQualityDataReturn {
   isLoading: boolean;
   isRefreshing: boolean;
   error: string | null;
-  loadData: (city: CityLocation, profile: HouseholdProfile, isManualRefresh?: boolean) => Promise<void>;
+  loadData: (
+    city: CityLocation,
+    profile: HouseholdProfile,
+    isManualRefresh?: boolean
+  ) => Promise<void>;
   clearError: () => void;
 }
 
@@ -92,7 +97,7 @@ export function useAirQualityData(
         const guidanceData: GuidanceResponse = await guidanceRes.json();
         setGuidance(guidanceData);
       } catch (err: unknown) {
-        console.error("Data loading error:", err);
+        logger.error("Data loading error:", err);
         setError(err instanceof Error ? err.message : "An unexpected network error occurred.");
       } finally {
         setIsLoading(false);

@@ -1,10 +1,4 @@
-export type CpcbCategory =
-  | "Good"
-  | "Satisfactory"
-  | "Moderate"
-  | "Poor"
-  | "Very Poor"
-  | "Severe";
+export type CpcbCategory = "Good" | "Satisfactory" | "Moderate" | "Poor" | "Very Poor" | "Severe";
 
 export interface CpcbCategoryInfo {
   category: CpcbCategory;

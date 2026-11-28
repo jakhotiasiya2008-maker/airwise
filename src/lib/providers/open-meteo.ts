@@ -1,5 +1,7 @@
-import { AirQualityProvider, AirQualityReading, HourlyForecastPoint } from "@/types/air-quality";
+import { AirQualityProvider, AirQualityReading } from "@/types/air-quality";
 import { calculateCpcbAqi } from "@/lib/cpcb/calculator";
+import { APP_CONFIG } from "@/lib/constants/config";
+import { processHourlyForecast } from "./forecast-processor";
 
 export class OpenMeteoAirQualityProvider implements AirQualityProvider {
   name = "Open-Meteo Air Quality API";
@@ -9,7 +11,7 @@ export class OpenMeteoAirQualityProvider implements AirQualityProvider {
     lon: number,
     locationName = "Detected Location"
   ): Promise<AirQualityReading> {
-    const url = new URL("https://air-quality-api.open-meteo.com/v1/air-quality");
+    const url = new URL(APP_CONFIG.endpoints.openMeteoAirQuality);
     url.searchParams.set("latitude", lat.toFixed(4));
     url.searchParams.set("longitude", lon.toFixed(4));
     url.searchParams.set("current", "pm10,pm2_5,us_aqi,european_aqi");
@@ -18,7 +20,7 @@ export class OpenMeteoAirQualityProvider implements AirQualityProvider {
     url.searchParams.set("timezone", "Asia/Kolkata");
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000);
+    const timeout = setTimeout(() => controller.abort(), APP_CONFIG.defaults.timeoutMs.airQuality);
 
     try {
       const response = await fetch(url.toString(), {
@@ -41,79 +43,20 @@ export class OpenMeteoAirQualityProvider implements AirQualityProvider {
         throw new Error("No current air quality data returned from Open-Meteo");
       }
 
-      const pm25 = typeof current.pm2_5 === "number" ? Math.max(0, Math.round(current.pm2_5 * 10) / 10) : 0;
-      const pm10 = typeof current.pm10 === "number" ? Math.max(0, Math.round(current.pm10 * 10) / 10) : 0;
+      const pm25 =
+        typeof current.pm2_5 === "number" ? Math.max(0, Math.round(current.pm2_5 * 10) / 10) : 0;
+      const pm10 =
+        typeof current.pm10 === "number" ? Math.max(0, Math.round(current.pm10 * 10) / 10) : 0;
       const usAqi = typeof current.us_aqi === "number" ? current.us_aqi : undefined;
-      const europeanAqi = typeof current.european_aqi === "number" ? current.european_aqi : undefined;
+      const europeanAqi =
+        typeof current.european_aqi === "number" ? current.european_aqi : undefined;
 
       const { aqi, category } = calculateCpcbAqi(pm25, pm10);
-
-      // Process 24-hour forecast
-      let hourlyForecast: HourlyForecastPoint[] = [];
-      let bestWindow: { start: string; end: string; reason: string } | undefined;
-      let avoidWindow: { start: string; end: string; reason: string } | undefined;
-
-      if (data.hourly && Array.isArray(data.hourly.time)) {
-        const times: string[] = data.hourly.time;
-        const pm25Arr: number[] = data.hourly.pm2_5 || [];
-        const pm10Arr: number[] = data.hourly.pm10 || [];
-
-        // Find current time index or start from now
-        const nowIsoPrefix = new Date().toISOString().slice(0, 13); // YYYY-MM-DDTHH
-        let startIndex = times.findIndex((t) => t.startsWith(nowIsoPrefix));
-        if (startIndex === -1) startIndex = 0;
-
-        const next24Times = times.slice(startIndex, startIndex + 24);
-        hourlyForecast = next24Times.map((t, i) => {
-          const idx = startIndex + i;
-          const hPm25 = Math.round((pm25Arr[idx] || pm25) * 10) / 10;
-          const hPm10 = Math.round((pm10Arr[idx] || pm10) * 10) / 10;
-          const calc = calculateCpcbAqi(hPm25, hPm10);
-
-          const dateObj = new Date(t);
-          const hourLabel = dateObj.toLocaleTimeString("en-IN", {
-            hour: "numeric",
-            hour12: true,
-            timeZone: "Asia/Kolkata",
-          });
-
-          let rec: "optimal" | "acceptable" | "avoid" = "acceptable";
-          if (calc.category === "Good" || calc.category === "Satisfactory") {
-            rec = "optimal";
-          } else if (calc.category === "Very Poor" || calc.category === "Severe") {
-            rec = "avoid";
-          }
-
-          return {
-            time: t,
-            hourLabel,
-            pm25: hPm25,
-            pm10: hPm10,
-            aqi: calc.aqi,
-            category: calc.category,
-            recommendation: rec,
-          };
-        });
-
-        // Compute best and worst windows
-        if (hourlyForecast.length > 0) {
-          const sortedByAqi = [...hourlyForecast].sort((a, b) => a.aqi - b.aqi);
-          const best = sortedByAqi[0];
-          const worst = sortedByAqi[sortedByAqi.length - 1];
-
-          bestWindow = {
-            start: best.hourLabel,
-            end: `${best.hourLabel} - 3 hrs later`,
-            reason: `Lowest predicted diurnal AQI (~${best.aqi}) due to maximum solar vertical dispersion.`,
-          };
-
-          avoidWindow = {
-            start: worst.hourLabel,
-            end: "Early morning / Night",
-            reason: `Peak nocturnal thermal inversion trap (~${worst.aqi} AQI).`,
-          };
-        }
-      }
+      const { hourlyForecast, bestWindow, avoidWindow } = processHourlyForecast(
+        data.hourly,
+        pm25,
+        pm10
+      );
 
       const now = new Date();
       const istFormatter = new Intl.DateTimeFormat("en-IN", {

@@ -91,8 +91,10 @@ describe("Deterministic Rule-Based Guidance Engine", () => {
       profile: bikeProfile,
     });
 
-    const bikeCard = guidance.sections.dailyRoutines.cards.find((c) =>
-      c.title.toLowerCase().includes("two-wheeler") || c.title.toLowerCase().includes("respirator")
+    const bikeCard = guidance.sections.dailyRoutines.cards.find(
+      (c) =>
+        c.title.toLowerCase().includes("two-wheeler") ||
+        c.title.toLowerCase().includes("respirator")
     );
     expect(bikeCard).toBeDefined();
     expect(bikeCard?.action).toContain("N95");

@@ -60,7 +60,10 @@ export const AirQualityHero: React.FC<AirQualityHeroProps> = ({
 
           <div className="space-y-2 max-w-md">
             <div className="flex items-center justify-center sm:justify-start gap-2 text-slate-600 dark:text-slate-400 text-sm">
-              <MapPin className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" aria-hidden="true" />
+              <MapPin
+                className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0"
+                aria-hidden="true"
+              />
               <span className="font-bold text-slate-900 dark:text-white text-base">
                 {selectedCityName || reading.stationOrLocation}
               </span>
@@ -106,11 +109,7 @@ export const AirQualityHero: React.FC<AirQualityHeroProps> = ({
         </div>
 
         {/* Right: Key Pollutant Metrics */}
-        <AirQualityMetricsGrid
-          pm25={reading.pm25}
-          pm10={reading.pm10}
-          usAqi={reading.usAqi}
-        />
+        <AirQualityMetricsGrid pm25={reading.pm25} pm10={reading.pm10} usAqi={reading.usAqi} />
       </div>
 
       {/* Metadata Bar */}

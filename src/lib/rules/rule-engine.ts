@@ -54,16 +54,19 @@ export function generateRuleBasedGuidance(input: RuleEngineInput): GuidanceRespo
       indoorAir: {
         id: "indoor_air",
         title: "Indoor Air Quality & Purification",
-        subtitle: "Science-backed indoor protection, purifier guidelines, and source emission control.",
+        subtitle:
+          "Science-backed indoor protection, purifier guidelines, and source emission control.",
         cards: indoorAirCards,
       },
       sustainableAlternatives: {
         id: "sustainable_alternatives",
         title: "Sustainable Community Alternatives",
-        subtitle: "Collective actions to lower local neighborhood emissions during pollution spikes.",
+        subtitle:
+          "Collective actions to lower local neighborhood emissions during pollution spikes.",
         cards: sustainableCards,
       },
     },
-    generatedAtIst: timestampIst || `${new Date().toLocaleTimeString("en-IN", { timeZone: "Asia/Kolkata" })} IST`,
+    generatedAtIst:
+      timestampIst || `${new Date().toLocaleTimeString("en-IN", { timeZone: "Asia/Kolkata" })} IST`,
   };
 }

@@ -51,7 +51,9 @@ export const GuidanceTabsHeader: React.FC<GuidanceTabsHeaderProps> = ({
         }`}
       >
         <Compass className="w-3.5 h-3.5" aria-hidden="true" />
-        <span>{t.tabs.routines} ({routinesCount})</span>
+        <span>
+          {t.tabs.routines} ({routinesCount})
+        </span>
       </button>
 
       <button
@@ -66,7 +68,9 @@ export const GuidanceTabsHeader: React.FC<GuidanceTabsHeaderProps> = ({
         }`}
       >
         <Home className="w-3.5 h-3.5" aria-hidden="true" />
-        <span>{t.tabs.indoor} ({indoorCount})</span>
+        <span>
+          {t.tabs.indoor} ({indoorCount})
+        </span>
       </button>
 
       <button
@@ -81,7 +85,9 @@ export const GuidanceTabsHeader: React.FC<GuidanceTabsHeaderProps> = ({
         }`}
       >
         <Leaf className="w-3.5 h-3.5" aria-hidden="true" />
-        <span>{t.tabs.sustainable} ({sustainableCount})</span>
+        <span>
+          {t.tabs.sustainable} ({sustainableCount})
+        </span>
       </button>
 
       <button

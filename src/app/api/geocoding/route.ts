@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { applyRateLimit, errorResponse } from "@/lib/api-utils";
 import { searchCitiesInIndia } from "@/lib/providers/geocoding";
+import { logger } from "@/lib/logger";
 
 const SearchSchema = z.object({
   q: z.string().max(100).default(""),
@@ -24,7 +25,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ results: cities });
   } catch (error) {
-    console.error("Geocoding search route error:", error);
+    logger.error("Geocoding search route error:", error);
     return errorResponse("Unable to complete location search. Please retry.", 502);
   }
 }

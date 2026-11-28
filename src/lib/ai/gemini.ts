@@ -2,6 +2,7 @@ import { GoogleGenAI } from "@google/genai";
 import { GuidanceResponse } from "@/types/guidance";
 import { GuidanceResponseSchema } from "@/lib/validation/schemas";
 import { generateRuleBasedGuidance, RuleEngineInput } from "@/lib/rules/rule-engine";
+import { logger } from "@/lib/logger";
 import {
   AIRWISE_SYSTEM_PROMPT,
   buildUserPrompt,
@@ -9,9 +10,7 @@ import {
   UserPromptData,
 } from "@/lib/prompt";
 
-export async function generateAiGuidance(
-  input: RuleEngineInput
-): Promise<GuidanceResponse> {
+export async function generateAiGuidance(input: RuleEngineInput): Promise<GuidanceResponse> {
   const apiKey = process.env.GEMINI_API_KEY?.trim();
   const modelName = process.env.GEMINI_MODEL?.trim() || "gemini-2.5-flash";
 
@@ -78,6 +77,9 @@ export async function generateAiGuidance(
   }
 
   // On repeated failure, log error and fall back to rules
-  console.warn("Gemini API call failed after 2 attempts, falling back to rule-based engine:", lastError?.message);
+  logger.warn(
+    "Gemini API call failed after 2 attempts, falling back to rule-based engine:",
+    lastError?.message
+  );
   return generateRuleBasedGuidance(input);
 }

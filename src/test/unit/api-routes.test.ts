@@ -28,7 +28,9 @@ describe("API Routes", () => {
       isModelled: true,
     });
 
-    const req = new NextRequest("http://localhost:3000/api/air-quality?lat=28.61&lon=77.2&city=Delhi");
+    const req = new NextRequest(
+      "http://localhost:3000/api/air-quality?lat=28.61&lon=77.2&city=Delhi"
+    );
     const res = await getAirQuality(req);
     expect(res.status).toBe(200);
     const data = await res.json();

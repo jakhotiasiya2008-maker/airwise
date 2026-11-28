@@ -3,6 +3,7 @@ import { z } from "zod";
 import { applyRateLimit, errorResponse } from "@/lib/api-utils";
 import { defaultAirQualityProvider } from "@/lib/providers/open-meteo";
 import { AQ_CACHE_TTL_MS, serverCache } from "@/lib/cache/memory-cache";
+import { logger } from "@/lib/logger";
 
 const QuerySchema = z.object({
   lat: z.coerce.number().min(-90).max(90),
@@ -35,10 +36,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(reading);
   } catch (error) {
-    console.error("Air quality route error:", error);
-    return errorResponse(
-      "Unable to fetch live air quality data at this time. Please retry.",
-      502
-    );
+    logger.error("Air quality route error:", error);
+    return errorResponse("Unable to fetch live air quality data at this time. Please retry.", 502);
   }
 }

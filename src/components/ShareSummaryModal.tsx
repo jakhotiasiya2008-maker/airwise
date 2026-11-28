@@ -5,6 +5,7 @@ import { useLanguage } from "@/lib/i18n/context";
 import { AirQualityReading } from "@/types/air-quality";
 import { GuidanceResponse } from "@/types/guidance";
 import { Share2, Copy, Check, MessageCircle, X } from "lucide-react";
+import { logger } from "@/lib/logger";
 
 interface ShareSummaryModalProps {
   isOpen: boolean;
@@ -49,7 +50,7 @@ ${actionBullets || "• Keep indoor spaces closed with HEPA filtration\n• Avoi
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
     } catch (err) {
-      console.warn("Clipboard copy failed:", err);
+      logger.warn("Clipboard copy failed:", err);
     }
   };
 
@@ -69,7 +70,10 @@ ${actionBullets || "• Keep indoor spaces closed with HEPA filtration\n• Avoi
         <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
           <div className="flex items-center gap-2">
             <Share2 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-            <h2 id="share-modal-title" className="text-base font-bold text-slate-900 dark:text-white">
+            <h2
+              id="share-modal-title"
+              className="text-base font-bold text-slate-900 dark:text-white"
+            >
               {t.share.shareTitle}
             </h2>
           </div>

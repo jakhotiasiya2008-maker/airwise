@@ -1,11 +1,4 @@
-export type CommuteMode =
-  | "metro"
-  | "bus"
-  | "car"
-  | "bike"
-  | "walk"
-  | "auto_rickshaw"
-  | "wfh";
+export type CommuteMode = "metro" | "bus" | "car" | "bike" | "walk" | "auto_rickshaw" | "wfh";
 
 export interface HouseholdProfile {
   hasYoungChildren: boolean;

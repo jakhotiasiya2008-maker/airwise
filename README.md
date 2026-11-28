@@ -187,21 +187,27 @@ npm run dev
 ## 9. Running Tests & Quality Verification
 
 ```bash
-# Run unit, component, API route, and axe accessibility tests
+# Run unit, component, API route, and axe accessibility tests (22 test files, 86 tests)
 npm test
 
-# Run TypeScript typecheck
+# Run ESLint validation
+npm run lint
+
+# Format code with Prettier
+npm run format
+
+# Run TypeScript typecheck (zero warnings or errors)
 npm run typecheck
 
 # Run Next.js production build
 npm run build
 ```
 
-**Test Coverage Summary (11 test files, 37 passing tests):**
-- ✅ **Unit Tests**: CPCB formula verification, category assignments, rule-based engine output validation, prompt builder & sanitization, Zod schemas, Open-Meteo provider parsing, ACH purifier formula, i18n translation dictionary.
-- ✅ **Component Tests**: `GuidanceCardItem` toggle & done behavior, `ProfileModal` state updates, `ErrorDisplay` retry triggers.
-- ✅ **API Route Tests**: Parameter validation, error handling, rate limiting, and rule fallback.
-- ✅ **Accessibility (a11y) Tests**: Evaluated via `axe-core` across hero, header, radial gauge, and advisory components in light and dark mode.
+**Test Coverage Summary (22 test files, 86 passing tests - 100% pass rate):**
+- ✅ **Unit Tests**: CPCB formula verification, category assignments, rule-based engine output validation, prompt builder & sanitization, Zod schemas, Open-Meteo provider parsing, forecast processor, diurnal curve calculations, ACH purifier formula, persona presets, structured `AppError` mapping, and i18n translation dictionary.
+- ✅ **Component Tests**: `GuidanceCardItem` toggle & done behavior, `ProfileModal` state updates, `ErrorDisplay` retry triggers, and interactive scenario tools.
+- ✅ **API Route Tests**: Parameter validation, error handling, rate limiting, and rule fallback across all routes.
+- ✅ **Accessibility (a11y) Tests**: Evaluated via `axe-core` across hero, header, radial gauge, and advisory components in light and dark mode with zero violations.
 
 ---
 

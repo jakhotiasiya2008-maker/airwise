@@ -6,12 +6,7 @@ import { ErrorDisplay } from "@/components/ErrorDisplay";
 describe("ErrorDisplay Component", () => {
   it("renders friendly error message and calls retry callback", () => {
     const onRetry = vi.fn();
-    render(
-      <ErrorDisplay
-        message="Unable to reach Open-Meteo API"
-        onRetry={onRetry}
-      />
-    );
+    render(<ErrorDisplay message="Unable to reach Open-Meteo API" onRetry={onRetry} />);
 
     expect(screen.getByRole("alert")).toBeInTheDocument();
     expect(screen.getByText("Unable to reach Open-Meteo API")).toBeInTheDocument();

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { applyRateLimit, errorResponse } from "@/lib/api-utils";
 import { GoogleGenAI } from "@google/genai";
 import { sanitizeUserNotes } from "@/lib/prompt";
+import { logger } from "@/lib/logger";
 
 const ChatRequestSchema = z.object({
   question: z.string().min(2).max(300),
@@ -24,10 +25,7 @@ export async function POST(request: NextRequest) {
     const parseResult = ChatRequestSchema.safeParse(body);
 
     if (!parseResult.success) {
-      return NextResponse.json(
-        { error: "Invalid question parameters" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Invalid question parameters" }, { status: 400 });
     }
 
     const { question, city, aqi, pm25, pm10, category, profile, language } = parseResult.data;
@@ -41,7 +39,13 @@ export async function POST(request: NextRequest) {
       const q = question.toLowerCase();
       const isHindi = language === "hi";
 
-      if (q.includes("jog") || q.includes("run") || q.includes("walk") || q.includes("टहल") || q.includes("दौड़")) {
+      if (
+        q.includes("jog") ||
+        q.includes("run") ||
+        q.includes("walk") ||
+        q.includes("टहल") ||
+        q.includes("दौड़")
+      ) {
         if (category === "Severe" || category === "Very Poor" || aqi > 300) {
           return isHindi
             ? `वर्तमान में ${city} का एक्यूआई ${aqi} (${category}) है। सुबह 5 से 9 बजे के बीच तीव्र इनवर्जन के कारण बाहरी जॉगिंग सख्त वर्जित है। कृपया घर के अंदर योग या ट्रेडमिल का उपयोग करें।`
@@ -96,14 +100,14 @@ User Question: "${sanitizedQuestion}"`;
         sourceEngine: "gemini",
       });
     } catch (err) {
-      console.warn("Gemini chat error, returning fallback rule:", err);
+      logger.warn("Gemini chat error, returning fallback rule:", err);
       return NextResponse.json({
         answer: generateFallbackAnswer(),
         sourceEngine: "rule-based",
       });
     }
   } catch (error) {
-    console.error("Chat route error:", error);
+    logger.error("Chat route error:", error);
     return errorResponse("Unable to process question at this time.", 500);
   }
 }

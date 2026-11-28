@@ -2,12 +2,7 @@ import React from "react";
 
 export const LoadingSkeleton: React.FC = () => {
   return (
-    <div
-      role="status"
-      aria-busy="true"
-      aria-live="polite"
-      className="space-y-6 animate-pulse"
-    >
+    <div role="status" aria-busy="true" aria-live="polite" className="space-y-6 animate-pulse">
       <span className="sr-only">Loading live air quality data and recommendations...</span>
 
       {/* Hero Skeleton */}

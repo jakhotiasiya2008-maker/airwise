@@ -5,11 +5,13 @@ import { CityLocation } from "@/types/air-quality";
 import { HouseholdProfile, PersonaPreset } from "@/types/profile";
 import { DEFAULT_CITIES } from "@/lib/constants/cities";
 import { PERSONA_PRESETS } from "@/lib/constants/personas";
+import { logger } from "@/lib/logger";
+import { useTheme } from "./useTheme";
+import { useNetworkStatus } from "./useNetworkStatus";
 
 const PROFILE_STORAGE_KEY = "airwise_india_profile";
 const PERSONA_STORAGE_KEY = "airwise_india_persona_id";
 const ONBOARDING_KEY = "airwise_onboarding_completed_v2";
-const THEME_STORAGE_KEY = "airwise_theme_dark";
 
 export interface UseHouseholdContextReturn {
   currentCity: CityLocation;
@@ -49,67 +51,25 @@ export function useHouseholdContext(): UseHouseholdContextReturn {
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
 
   // Theme & Network
-  const [isDark, setIsDark] = useState(false);
-  const [isOffline, setIsOffline] = useState(false);
+  const { isDark, toggleTheme } = useTheme();
+  const isOffline = useNetworkStatus();
 
-  // Initial client hydration
+  // Initial client hydration for profiles & onboarding
   useEffect(() => {
     try {
-      setIsOffline(!navigator.onLine);
-      const handleOnline = () => setIsOffline(false);
-      const handleOffline = () => setIsOffline(true);
-      window.addEventListener("online", handleOnline);
-      window.addEventListener("offline", handleOffline);
-
-      // Theme
-      const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
-      if (savedTheme !== null) {
-        setIsDark(savedTheme === "true");
-      } else {
-        setIsDark(window.matchMedia("(prefers-color-scheme: dark)").matches);
-      }
-
-      // Onboarding
       const onboardingCompleted = localStorage.getItem(ONBOARDING_KEY);
       if (!onboardingCompleted) {
         setIsOnboardingOpen(true);
       }
 
-      // Persona & Profile
       const savedPersona = localStorage.getItem(PERSONA_STORAGE_KEY);
       if (savedPersona) setActivePersonaId(savedPersona);
 
       const savedProfile = localStorage.getItem(PROFILE_STORAGE_KEY);
       if (savedProfile) setProfile(JSON.parse(savedProfile));
-
-      return () => {
-        window.removeEventListener("online", handleOnline);
-        window.removeEventListener("offline", handleOffline);
-      };
     } catch (e) {
-      console.warn("Context hydration notice:", e);
+      logger.warn("Context hydration notice:", e);
     }
-  }, []);
-
-  // Sync dark class to document
-  useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [isDark]);
-
-  const toggleTheme = useCallback(() => {
-    setIsDark((prev) => {
-      const next = !prev;
-      try {
-        localStorage.setItem(THEME_STORAGE_KEY, String(next));
-      } catch (e) {
-        console.warn("Could not save theme:", e);
-      }
-      return next;
-    });
   }, []);
 
   const selectPreset = useCallback((preset: PersonaPreset) => {
@@ -130,15 +90,18 @@ export function useHouseholdContext(): UseHouseholdContextReturn {
     } catch {}
   }, []);
 
-  const completeOnboarding = useCallback((city: CityLocation, completedProfile: HouseholdProfile) => {
-    setCurrentCity(city);
-    setProfile(completedProfile);
-    setIsOnboardingOpen(false);
-    try {
-      localStorage.setItem(ONBOARDING_KEY, "true");
-      localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(completedProfile));
-    } catch {}
-  }, []);
+  const completeOnboarding = useCallback(
+    (city: CityLocation, completedProfile: HouseholdProfile) => {
+      setCurrentCity(city);
+      setProfile(completedProfile);
+      setIsOnboardingOpen(false);
+      try {
+        localStorage.setItem(ONBOARDING_KEY, "true");
+        localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(completedProfile));
+      } catch {}
+    },
+    []
+  );
 
   const skipOnboarding = useCallback(() => {
     setIsOnboardingOpen(false);

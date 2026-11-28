@@ -2,13 +2,13 @@
 
 import React, { useState } from "react";
 import { GuidanceResponse } from "@/types/guidance";
-import { GuidanceCardItem } from "@/components/GuidanceCardItem";
 import { InteractiveTools } from "@/components/InteractiveTools";
 import { HouseholdProfile } from "@/types/profile";
 import { CpcbCategory } from "@/types/air-quality";
 import { Compass, Home, Leaf } from "lucide-react";
 import { GuidanceProgressTracker } from "./guidance/GuidanceProgressTracker";
 import { GuidanceTabsHeader, GuidanceTabType } from "./guidance/GuidanceTabsHeader";
+import { GuidanceCardGrid } from "./guidance/GuidanceCardGrid";
 
 interface GuidanceSectionViewProps {
   guidance: GuidanceResponse;
@@ -32,11 +32,7 @@ export const GuidanceSectionView: React.FC<GuidanceSectionViewProps> = ({
 
   const { dailyRoutines, indoorAir, sustainableAlternatives } = guidance.sections;
 
-  const allCards = [
-    ...dailyRoutines.cards,
-    ...indoorAir.cards,
-    ...sustainableAlternatives.cards,
-  ];
+  const allCards = [...dailyRoutines.cards, ...indoorAir.cards, ...sustainableAlternatives.cards];
   const totalTasks = allCards.length;
   const completedCount = completedTaskIds.size;
   const progressPercent = totalTasks > 0 ? Math.round((completedCount / totalTasks) * 100) : 0;
@@ -70,86 +66,49 @@ export const GuidanceSectionView: React.FC<GuidanceSectionViewProps> = ({
 
       {/* Interactive Tools View */}
       {activeTab === "tools" && (
-        <InteractiveTools
-          aqi={aqi}
-          category={category}
-          profile={profile}
-        />
+        <InteractiveTools aqi={aqi} category={category} profile={profile} />
       )}
 
       {/* Section 1: Low-Emission Daily Routines */}
       {(activeTab === "all" || activeTab === "routines") && (
-        <section aria-labelledby="section-routines" className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Compass className="w-5 h-5 text-blue-600 dark:text-blue-400" aria-hidden="true" />
-            <div>
-              <h2 id="section-routines" className="text-base font-bold text-slate-900 dark:text-white">
-                {dailyRoutines.title}
-              </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">{dailyRoutines.subtitle}</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {dailyRoutines.cards.map((card) => (
-              <GuidanceCardItem
-                key={card.id}
-                card={card}
-                isDone={completedTaskIds.has(card.id)}
-                onToggleDone={handleToggleDone}
-              />
-            ))}
-          </div>
-        </section>
+        <GuidanceCardGrid
+          id="routines"
+          icon={Compass}
+          iconColorClass="text-blue-600 dark:text-blue-400"
+          title={dailyRoutines.title}
+          subtitle={dailyRoutines.subtitle}
+          cards={dailyRoutines.cards}
+          completedTaskIds={completedTaskIds}
+          onToggleDone={handleToggleDone}
+        />
       )}
 
       {/* Section 2: Indoor Air Quality */}
       {(activeTab === "all" || activeTab === "indoor") && (
-        <section aria-labelledby="section-indoor" className="space-y-3 pt-2">
-          <div className="flex items-center gap-2">
-            <Home className="w-5 h-5 text-indigo-600 dark:text-indigo-400" aria-hidden="true" />
-            <div>
-              <h2 id="section-indoor" className="text-base font-bold text-slate-900 dark:text-white">
-                {indoorAir.title}
-              </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">{indoorAir.subtitle}</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {indoorAir.cards.map((card) => (
-              <GuidanceCardItem
-                key={card.id}
-                card={card}
-                isDone={completedTaskIds.has(card.id)}
-                onToggleDone={handleToggleDone}
-              />
-            ))}
-          </div>
-        </section>
+        <GuidanceCardGrid
+          id="indoor"
+          icon={Home}
+          iconColorClass="text-indigo-600 dark:text-indigo-400"
+          title={indoorAir.title}
+          subtitle={indoorAir.subtitle}
+          cards={indoorAir.cards}
+          completedTaskIds={completedTaskIds}
+          onToggleDone={handleToggleDone}
+        />
       )}
 
       {/* Section 3: Sustainable Alternatives */}
       {(activeTab === "all" || activeTab === "sustainable") && (
-        <section aria-labelledby="section-sustainable" className="space-y-3 pt-2">
-          <div className="flex items-center gap-2">
-            <Leaf className="w-5 h-5 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
-            <div>
-              <h2 id="section-sustainable" className="text-base font-bold text-slate-900 dark:text-white">
-                {sustainableAlternatives.title}
-              </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">{sustainableAlternatives.subtitle}</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {sustainableAlternatives.cards.map((card) => (
-              <GuidanceCardItem
-                key={card.id}
-                card={card}
-                isDone={completedTaskIds.has(card.id)}
-                onToggleDone={handleToggleDone}
-              />
-            ))}
-          </div>
-        </section>
+        <GuidanceCardGrid
+          id="sustainable"
+          icon={Leaf}
+          iconColorClass="text-emerald-600 dark:text-emerald-400"
+          title={sustainableAlternatives.title}
+          subtitle={sustainableAlternatives.subtitle}
+          cards={sustainableAlternatives.cards}
+          completedTaskIds={completedTaskIds}
+          onToggleDone={handleToggleDone}
+        />
       )}
     </div>
   );

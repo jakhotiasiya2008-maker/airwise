@@ -19,9 +19,7 @@ export const CityStep: React.FC<CityStepProps> = ({ selectedCity, onSelectCity }
         <h2 id="onboarding-title" className="text-xl font-extrabold text-slate-900 dark:text-white">
           {t.onboarding.step1Title}
         </h2>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-          {t.onboarding.step1Desc}
-        </p>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t.onboarding.step1Desc}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto">

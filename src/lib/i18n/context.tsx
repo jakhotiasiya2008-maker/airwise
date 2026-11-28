@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { SupportedLanguage, TranslationDict, translations } from "./translations";
+import { logger } from "@/lib/logger";
 
 interface LanguageContextType {
   language: SupportedLanguage;
@@ -27,7 +28,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setLanguageState(saved);
       }
     } catch (e) {
-      console.warn("Could not load language from localStorage:", e);
+      logger.warn("Could not load language from localStorage:", e);
     }
   }, []);
 
@@ -36,7 +37,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     try {
       localStorage.setItem(STORAGE_KEY, lang);
     } catch (e) {
-      console.warn("Could not save language to localStorage:", e);
+      logger.warn("Could not save language to localStorage:", e);
     }
   };
 

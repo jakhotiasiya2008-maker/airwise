@@ -3,6 +3,7 @@ import { applyRateLimit, errorResponse } from "@/lib/api-utils";
 import { DEFAULT_CITIES } from "@/lib/constants/cities";
 import { defaultAirQualityProvider } from "@/lib/providers/open-meteo";
 import { AQ_CACHE_TTL_MS, serverCache } from "@/lib/cache/memory-cache";
+import { logger } from "@/lib/logger";
 
 export async function GET(request: NextRequest) {
   const rateLimitResponse = applyRateLimit(request);
@@ -16,9 +17,7 @@ export async function GET(request: NextRequest) {
       .filter(Boolean)
       .slice(0, 4);
 
-    const selectedCities = DEFAULT_CITIES.filter((c) =>
-      requestedIds.includes(c.id.toString())
-    );
+    const selectedCities = DEFAULT_CITIES.filter((c) => requestedIds.includes(c.id.toString()));
 
     // If none matched, default to Delhi, Mumbai, Bengaluru
     const targetCities = selectedCities.length > 0 ? selectedCities : DEFAULT_CITIES.slice(0, 3);
@@ -41,7 +40,7 @@ export async function GET(request: NextRequest) {
           serverCache.set(cacheKey, fresh, AQ_CACHE_TTL_MS);
           return { city, reading: fresh };
         } catch (err) {
-          console.warn(`Failed air quality fetch for compare city ${city.name}:`, err);
+          logger.warn(`Failed air quality fetch for compare city ${city.name}:`, err);
           return { city, reading: null };
         }
       })
@@ -49,7 +48,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ comparisons: readings });
   } catch (error) {
-    console.error("Compare route error:", error);
+    logger.error("Compare route error:", error);
     return errorResponse("Failed to fetch city comparison data.", 502);
   }
 }

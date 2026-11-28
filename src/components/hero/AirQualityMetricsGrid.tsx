@@ -23,9 +23,7 @@ export const AirQualityMetricsGrid: React.FC<AirQualityMetricsGridProps> = ({
           {t.pm25}
         </span>
         <div className="mt-1 flex items-baseline justify-center gap-1">
-          <span className="text-2xl font-black text-slate-900 dark:text-white">
-            {pm25}
-          </span>
+          <span className="text-2xl font-black text-slate-900 dark:text-white">{pm25}</span>
           <span className="text-[11px] text-slate-500">µg/m³</span>
         </div>
         <p className="text-[10px] text-slate-400 mt-0.5">CPCB std: 60</p>
@@ -36,9 +34,7 @@ export const AirQualityMetricsGrid: React.FC<AirQualityMetricsGridProps> = ({
           {t.pm10}
         </span>
         <div className="mt-1 flex items-baseline justify-center gap-1">
-          <span className="text-2xl font-black text-slate-900 dark:text-white">
-            {pm10}
-          </span>
+          <span className="text-2xl font-black text-slate-900 dark:text-white">{pm10}</span>
           <span className="text-[11px] text-slate-500">µg/m³</span>
         </div>
         <p className="text-[10px] text-slate-400 mt-0.5">CPCB std: 100</p>
@@ -50,9 +46,7 @@ export const AirQualityMetricsGrid: React.FC<AirQualityMetricsGridProps> = ({
             US AQI
           </span>
           <div className="mt-1 flex items-baseline justify-center gap-1">
-            <span className="text-2xl font-black text-slate-900 dark:text-white">
-              {usAqi}
-            </span>
+            <span className="text-2xl font-black text-slate-900 dark:text-white">{usAqi}</span>
             <span className="text-[11px] text-slate-500">index</span>
           </div>
           <p className="text-[10px] text-slate-400 mt-0.5">EPA standard</p>

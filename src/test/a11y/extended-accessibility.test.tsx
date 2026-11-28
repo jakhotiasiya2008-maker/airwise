@@ -56,11 +56,7 @@ describe("Extended Accessibility & WCAG 2.2 AA Auditing", () => {
   it("OnboardingWizard satisfies dialog accessibility requirements", async () => {
     const { container } = render(
       <LanguageProvider>
-        <OnboardingWizard
-          isOpen={true}
-          onComplete={() => {}}
-          onSkip={() => {}}
-        />
+        <OnboardingWizard isOpen={true} onComplete={() => {}} onSkip={() => {}} />
       </LanguageProvider>
     );
 

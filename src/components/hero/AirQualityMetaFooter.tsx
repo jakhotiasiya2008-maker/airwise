@@ -41,14 +41,21 @@ export const AirQualityMetaFooter: React.FC<AirQualityMetaFooterProps> = ({
         <div className="flex items-center gap-1.5" title="Data provider">
           <Database className="w-3.5 h-3.5 text-slate-400" aria-hidden="true" />
           <span>
-            {t.source}: <strong className="font-semibold text-slate-700 dark:text-slate-300">{source}</strong>
+            {t.source}:{" "}
+            <strong className="font-semibold text-slate-700 dark:text-slate-300">{source}</strong>
           </span>
         </div>
 
-        <div className="flex items-center gap-1.5" title="Official measurement time in Indian Standard Time">
+        <div
+          className="flex items-center gap-1.5"
+          title="Official measurement time in Indian Standard Time"
+        >
           <Clock className="w-3.5 h-3.5 text-slate-400" aria-hidden="true" />
           <span>
-            {t.measured}: <strong className="font-semibold text-slate-700 dark:text-slate-300">{timestampIst}</strong>
+            {t.measured}:{" "}
+            <strong className="font-semibold text-slate-700 dark:text-slate-300">
+              {timestampIst}
+            </strong>
             <span className="text-slate-400 ml-1">
               ({minutesAgo === 0 ? "just now" : `${minutesAgo}m ago`})
             </span>

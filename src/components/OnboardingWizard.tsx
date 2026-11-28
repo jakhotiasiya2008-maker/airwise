@@ -72,8 +72,8 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({
                     step === s
                       ? "w-6 bg-blue-600"
                       : step > s
-                      ? "bg-blue-300 dark:bg-blue-800"
-                      : "bg-slate-200 dark:bg-slate-700"
+                        ? "bg-blue-300 dark:bg-blue-800"
+                        : "bg-slate-200 dark:bg-slate-700"
                   }`}
                 />
               ))}
@@ -91,15 +91,9 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({
         </div>
 
         {/* Dynamic Step Content */}
-        {step === 1 && (
-          <CityStep selectedCity={selectedCity} onSelectCity={setSelectedCity} />
-        )}
-        {step === 2 && (
-          <HouseholdStep profile={profile} onChangeProfile={setProfile} />
-        )}
-        {step === 3 && (
-          <HabitsStep profile={profile} onChangeProfile={setProfile} />
-        )}
+        {step === 1 && <CityStep selectedCity={selectedCity} onSelectCity={setSelectedCity} />}
+        {step === 2 && <HouseholdStep profile={profile} onChangeProfile={setProfile} />}
+        {step === 3 && <HabitsStep profile={profile} onChangeProfile={setProfile} />}
 
         {/* Action Buttons */}
         <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800">

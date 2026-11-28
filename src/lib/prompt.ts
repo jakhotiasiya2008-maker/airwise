@@ -1,5 +1,8 @@
 import { HouseholdProfile } from "@/types/profile";
 import { CpcbCategory } from "@/types/air-quality";
+import { GEMINI_RESPONSE_SCHEMA } from "./schemas/gemini-schema";
+
+export { GEMINI_RESPONSE_SCHEMA };
 
 export interface UserPromptData {
   city: string;
@@ -46,7 +49,7 @@ export function sanitizeUserNotes(notes?: string): string {
     .replace(/ignore\s+(previous|all)\s+instructions/gi, "[filtered]")
     .replace(/system\s*:/gi, "[filtered]")
     .trim()
-    .slice(0, 300); // limit to max 300 chars
+    .slice(0, 300);
   return cleaned || "None provided";
 }
 
@@ -81,104 +84,27 @@ export function buildUserPrompt(data: UserPromptData): string {
   return JSON.stringify(payload, null, 2);
 }
 
-import { Type, Schema } from "@google/genai";
+/**
+ * Builds grounded follow-up chat prompt ensuring strict boundary limits
+ */
+export function buildChatPrompt(params: {
+  question: string;
+  city: string;
+  aqi: number;
+  pm25: number;
+  pm10: number;
+  category: string;
+  profile: Record<string, unknown>;
+  language: string;
+}): string {
+  const sanitizedQuestion = sanitizeUserNotes(params.question);
+  return `City: ${params.city}
+Current CPCB AQI: ${params.aqi} (${params.category})
+PM2.5: ${params.pm25} µg/m³, PM10: ${params.pm10} µg/m³
+User Profile: ${JSON.stringify(params.profile)}
+Language: ${params.language === "hi" ? "Hindi" : "English"}
 
-// Schema definition for Gemini response format using @google/genai Schema
-export const GEMINI_RESPONSE_SCHEMA: Schema = {
-  type: Type.OBJECT,
-  properties: {
-    healthAdvisory: {
-      type: Type.OBJECT,
-      properties: {
-        severity: { type: Type.STRING, enum: ["mild", "moderate", "high", "severe"] },
-        headline: { type: Type.STRING },
-        summary: { type: Type.STRING },
-        sensitiveGroupWarning: { type: Type.STRING },
-        disclaimer: { type: Type.STRING },
-      },
-      required: ["severity", "headline", "summary", "disclaimer"],
-    },
-    sections: {
-      type: Type.OBJECT,
-      properties: {
-        dailyRoutines: {
-          type: Type.OBJECT,
-          properties: {
-            id: { type: Type.STRING, enum: ["daily_routines"] },
-            title: { type: Type.STRING },
-            subtitle: { type: Type.STRING },
-            cards: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  id: { type: Type.STRING },
-                  title: { type: Type.STRING },
-                  action: { type: Type.STRING },
-                  whyThisMatters: { type: Type.STRING },
-                  expectedImpact: { type: Type.STRING },
-                  urgency: { type: Type.STRING, enum: ["low", "medium", "high", "critical"] },
-                  tags: { type: Type.ARRAY, items: { type: Type.STRING } },
-                },
-                required: ["id", "title", "action", "whyThisMatters", "expectedImpact", "urgency"],
-              },
-            },
-          },
-          required: ["id", "title", "subtitle", "cards"],
-        },
-        indoorAir: {
-          type: Type.OBJECT,
-          properties: {
-            id: { type: Type.STRING, enum: ["indoor_air"] },
-            title: { type: Type.STRING },
-            subtitle: { type: Type.STRING },
-            cards: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  id: { type: Type.STRING },
-                  title: { type: Type.STRING },
-                  action: { type: Type.STRING },
-                  whyThisMatters: { type: Type.STRING },
-                  expectedImpact: { type: Type.STRING },
-                  urgency: { type: Type.STRING, enum: ["low", "medium", "high", "critical"] },
-                  tags: { type: Type.ARRAY, items: { type: Type.STRING } },
-                },
-                required: ["id", "title", "action", "whyThisMatters", "expectedImpact", "urgency"],
-              },
-            },
-          },
-          required: ["id", "title", "subtitle", "cards"],
-        },
-        sustainableAlternatives: {
-          type: Type.OBJECT,
-          properties: {
-            id: { type: Type.STRING, enum: ["sustainable_alternatives"] },
-            title: { type: Type.STRING },
-            subtitle: { type: Type.STRING },
-            cards: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  id: { type: Type.STRING },
-                  title: { type: Type.STRING },
-                  action: { type: Type.STRING },
-                  whyThisMatters: { type: Type.STRING },
-                  expectedImpact: { type: Type.STRING },
-                  urgency: { type: Type.STRING, enum: ["low", "medium", "high", "critical"] },
-                  tags: { type: Type.ARRAY, items: { type: Type.STRING } },
-                },
-                required: ["id", "title", "action", "whyThisMatters", "expectedImpact", "urgency"],
-              },
-            },
-          },
-          required: ["id", "title", "subtitle", "cards"],
-        },
-      },
-      required: ["dailyRoutines", "indoorAir", "sustainableAlternatives"],
-    },
-  },
-  required: ["healthAdvisory", "sections"],
-};
+User Question: "${sanitizedQuestion}"
+
+Provide a concise, scientifically grounded 2-3 sentence answer directly tailored to their city conditions and family.`;
+}

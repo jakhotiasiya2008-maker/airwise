@@ -68,11 +68,7 @@ describe("Interactive Components Suite", () => {
 
     render(
       <LanguageProvider>
-        <OnboardingWizard
-          isOpen={true}
-          onComplete={handleComplete}
-          onSkip={handleSkip}
-        />
+        <OnboardingWizard isOpen={true} onComplete={handleComplete} onSkip={handleSkip} />
       </LanguageProvider>
     );
 

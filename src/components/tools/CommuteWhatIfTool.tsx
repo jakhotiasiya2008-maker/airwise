@@ -35,7 +35,8 @@ export const CommuteWhatIfTool: React.FC<CommuteWhatIfToolProps> = ({ initialMod
           icon: <Bike className="w-5 h-5 text-amber-500" />,
           label: "Motorcycle / Scooter",
           exposureScore: "9 / 10 (Very High)",
-          exposureDesc: "Direct inhalation of roadside diesel exhaust & resuspended road dust. High particulate load.",
+          exposureDesc:
+            "Direct inhalation of roadside diesel exhaust & resuspended road dust. High particulate load.",
           emissionLevel: "Moderate (tailpipe emissions)",
           recommendedGear: "Strictly wear certified N95 mask with silicone seal.",
         };
@@ -44,7 +45,8 @@ export const CommuteWhatIfTool: React.FC<CommuteWhatIfToolProps> = ({ initialMod
           icon: <Car className="w-5 h-5 text-blue-500" />,
           label: "Personal Car",
           exposureScore: "4 / 10 (Low-Moderate)",
-          exposureDesc: "Enclosed cabin with HVAC filter reduces outside PM2.5 by ~50-70% when on recirculation.",
+          exposureDesc:
+            "Enclosed cabin with HVAC filter reduces outside PM2.5 by ~50-70% when on recirculation.",
           emissionLevel: "High (per capita emissions)",
           recommendedGear: "Set AC to internal recirculation mode.",
         };
@@ -62,7 +64,8 @@ export const CommuteWhatIfTool: React.FC<CommuteWhatIfToolProps> = ({ initialMod
           icon: <Bus className="w-5 h-5 text-indigo-500" />,
           label: "Public Bus",
           exposureScore: "6 / 10 (Moderate)",
-          exposureDesc: "Window openings determine exposure; high passenger density cuts traffic emissions.",
+          exposureDesc:
+            "Window openings determine exposure; high passenger density cuts traffic emissions.",
           emissionLevel: "Very Low per passenger-km",
           recommendedGear: "Keep N95 mask on during boarding and transit.",
         };
@@ -85,13 +88,9 @@ export const CommuteWhatIfTool: React.FC<CommuteWhatIfToolProps> = ({ initialMod
     <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm space-y-4">
       <div className="flex items-center gap-2">
         <Sparkles className="w-4 h-4 text-amber-500" />
-        <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-          {t.tools.whatIfTitle}
-        </h3>
+        <h3 className="text-sm font-bold text-slate-900 dark:text-white">{t.tools.whatIfTitle}</h3>
       </div>
-      <p className="text-xs text-slate-500 dark:text-slate-400">
-        {t.tools.whatIfDesc}
-      </p>
+      <p className="text-xs text-slate-500 dark:text-slate-400">{t.tools.whatIfDesc}</p>
 
       <div className="flex items-center gap-1.5 flex-wrap">
         {COMMUTE_OPTIONS.map((mode) => (

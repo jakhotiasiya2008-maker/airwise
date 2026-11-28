@@ -22,7 +22,7 @@ export const AirQualityRadialGauge: React.FC<AirQualityRadialGaugeProps> = ({
   const radius = (size - strokeWidth) / 2;
   const center = size / 2;
   const circumference = 2 * Math.PI * radius;
-  
+
   // 240 degree arc gauge
   const arcLength = circumference * (240 / 360);
   const maxAqi = 500;

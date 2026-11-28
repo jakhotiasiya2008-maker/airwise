@@ -35,9 +35,7 @@ export const PurifierAdequacyTool: React.FC<PurifierAdequacyToolProps> = ({
           {t.tools.purifierCheckTitle}
         </h3>
       </div>
-      <p className="text-xs text-slate-500 dark:text-slate-400">
-        {t.tools.purifierCheckDesc}
-      </p>
+      <p className="text-xs text-slate-500 dark:text-slate-400">{t.tools.purifierCheckDesc}</p>
 
       <div className="space-y-3">
         <div>
@@ -78,9 +76,7 @@ export const PurifierAdequacyTool: React.FC<PurifierAdequacyToolProps> = ({
       <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 space-y-2">
         <div className="flex items-center justify-between text-xs">
           <span className="text-slate-600 dark:text-slate-400">{t.tools.achLabel}:</span>
-          <span className="text-base font-extrabold text-slate-900 dark:text-white">
-            {ach} ACH
-          </span>
+          <span className="text-base font-extrabold text-slate-900 dark:text-white">{ach} ACH</span>
         </div>
         <p
           className={`text-xs font-semibold ${

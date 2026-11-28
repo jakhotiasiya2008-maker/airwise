@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { CityLocation } from "@/types/air-quality";
+import { logger } from "@/lib/logger";
 
 export interface UseLocationSearchReturn {
   query: string;
@@ -48,7 +49,7 @@ export function useLocationSearch(): UseLocationSearchReturn {
           setIsOpen(true);
         }
       } catch (err) {
-        console.warn("Geocoding fetch error:", err);
+        logger.warn("Geocoding fetch error:", err);
       } finally {
         setIsSearching(false);
       }

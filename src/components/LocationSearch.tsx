@@ -2,9 +2,10 @@
 
 import React from "react";
 import { CityLocation } from "@/types/air-quality";
-import { DEFAULT_CITIES } from "@/lib/constants/cities";
 import { Search, Navigation, Loader2, AlertCircle, X } from "lucide-react";
 import { useLocationSearch } from "@/hooks/useLocationSearch";
+import { LocationSearchDropdown } from "./location/LocationSearchDropdown";
+import { LocationQuickChips } from "./location/LocationQuickChips";
 
 interface LocationSearchProps {
   currentCity: CityLocation;
@@ -93,41 +94,17 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
           </div>
         </div>
 
-        {/* Search Results Dropdown */}
-        {isOpen && (results.length > 0 || isSearching) && (
-          <div className="absolute left-0 right-0 top-full mt-1.5 z-40 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl overflow-hidden max-h-72 overflow-y-auto">
-            {isSearching && (
-              <div className="p-3 text-xs text-slate-400 flex items-center justify-center gap-2">
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                <span>Searching verified Indian locations...</span>
-              </div>
-            )}
-
-            {!isSearching && results.length === 0 && query.length >= 2 && (
-              <div className="p-4 text-xs text-center text-slate-400">
-                No Indian cities found matching &quot;{query}&quot;.
-              </div>
-            )}
-
-            {!isSearching &&
-              results.map((city) => (
-                <button
-                  key={city.id}
-                  type="button"
-                  onClick={() => {
-                    onSelectCity(city);
-                    clearSearch();
-                  }}
-                  className="w-full px-4 py-2.5 text-left text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800/80 flex items-center justify-between border-b border-slate-100 dark:border-slate-800 last:border-0 transition-colors"
-                >
-                  <span className="font-semibold text-slate-900 dark:text-white">
-                    {city.name}
-                  </span>
-                  <span className="text-slate-400 text-[11px]">{city.state}</span>
-                </button>
-              ))}
-          </div>
-        )}
+        {/* Dropdown */}
+        <LocationSearchDropdown
+          isOpen={isOpen}
+          isSearching={isSearching}
+          results={results}
+          query={query}
+          onSelectCity={(city) => {
+            onSelectCity(city);
+            clearSearch();
+          }}
+        />
       </div>
 
       {/* Geolocation Denied / Error Banner */}
@@ -152,28 +129,7 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
       )}
 
       {/* Popular City Quick-Chips */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-0.5 scrollbar-none text-xs">
-        <span className="text-[11px] font-semibold text-slate-400 shrink-0 mr-1">
-          Quick cities:
-        </span>
-        {DEFAULT_CITIES.map((city) => {
-          const isSelected = currentCity.id === city.id;
-          return (
-            <button
-              key={city.id}
-              type="button"
-              onClick={() => onSelectCity(city)}
-              className={`px-2.5 py-1 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                isSelected
-                  ? "bg-blue-600 text-white shadow-sm ring-2 ring-blue-600/30"
-                  : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700"
-              }`}
-            >
-              {city.name}
-            </button>
-          );
-        })}
-      </div>
+      <LocationQuickChips currentCityId={currentCity.id} onSelectCity={onSelectCity} />
     </div>
   );
 };

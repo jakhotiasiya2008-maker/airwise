@@ -56,17 +56,15 @@ export const HealthAdvisoryBanner: React.FC<HealthAdvisoryBannerProps> = ({ advi
         {style.icon}
         <div className="space-y-1.5 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className={`font-bold text-base ${style.title}`}>
-              {advisory.headline}
-            </h2>
-            <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${style.pill}`}>
+            <h2 className={`font-bold text-base ${style.title}`}>{advisory.headline}</h2>
+            <span
+              className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${style.pill}`}
+            >
               {advisory.severity} Alert
             </span>
           </div>
 
-          <p className={`text-sm ${style.body}`}>
-            {advisory.summary}
-          </p>
+          <p className={`text-sm ${style.body}`}>{advisory.summary}</p>
 
           {advisory.sensitiveGroupWarning && (
             <div className="mt-2 p-2.5 rounded-xl bg-white/70 dark:bg-slate-900/60 border border-current/20 text-xs font-medium">
